@@ -7,6 +7,9 @@ export async function deliverOnce(pool: Pool) {
   const c = await pool.connect();
   try {
     await c.query("BEGIN");
+    await c.query(
+      "UPDATE mail_delivery SET status='failed',ciphertext=NULL WHERE status='pending' AND expires_at<=now()",
+    );
     const result = await c.query(
       "SELECT * FROM mail_delivery WHERE status='pending' AND next_attempt_at<=now() ORDER BY created_at FOR UPDATE SKIP LOCKED LIMIT 1",
     );

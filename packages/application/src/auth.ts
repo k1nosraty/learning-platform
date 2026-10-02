@@ -16,9 +16,9 @@ async function authEmail(
   kind: "verify" | "reset",
   user: { email: string; preferredLocale?: unknown },
   url: string,
-  request?: Request,
+  _request?: Request,
 ) {
-  const locale = requestLocale(request, String(user.preferredLocale ?? "en"));
+  const locale = (user.preferredLocale === "fa" ? "fa" : "en") as Locale;
   const c = await authPool().connect();
   try {
     await enqueueMail(c, {
@@ -64,8 +64,12 @@ function makeAuth() {
       expiresIn: 3600,
       sendVerificationEmail: async ({ user, url }, request) =>
         authEmail("verify", user, url, request),
-      afterEmailVerification: async (user, request) => {
-        const locale = requestLocale(request);
+      afterEmailVerification: async (user) => {
+        const locale: Locale =
+          (user as typeof user & { preferredLocale?: string })
+            .preferredLocale === "fa"
+            ? "fa"
+            : "en";
         const actor: Actor = {
           ...user,
           preferredLocale: locale,
@@ -100,6 +104,19 @@ function makeAuth() {
         "/sign-in/email": { window: 60, max: 10 },
         "/sign-up/email": { window: 60, max: 5 },
         "/request-password-reset": { window: 60, max: 5 },
+      },
+    },
+    databaseHooks: {
+      user: {
+        create: {
+          before: async (user, ctx) => ({
+            data: {
+              ...user,
+              email: user.email.trim().toLowerCase(),
+              preferredLocale: requestLocale(ctx?.request),
+            },
+          }),
+        },
       },
     },
     logger: { disabled: process.env.NODE_ENV === "test", level: "error" },

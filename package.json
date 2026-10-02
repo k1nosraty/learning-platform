@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "pnpm --filter @learning/web dev",
     "dev:worker": "node --import tsx apps/worker/src/main.ts",
-    "build": "pnpm --filter @learning/web build",
+    "build": "pnpm --filter @learning/web build && pnpm build:worker",
     "lint": "biome check .",
     "typecheck": "tsc --noEmit",
     "test:unit": "node --import tsx --test tests/unit/*.test.ts",
@@ -18,7 +18,9 @@
     "db:migrate": "node --import tsx scripts/migrate.ts",
     "db:seed": "node --import tsx scripts/seed.ts",
     "docs:check": "node --import tsx scripts/docs-check.ts",
-    "check": "pnpm lint && pnpm typecheck && pnpm test:unit && pnpm docs:check"
+    "check": "pnpm lint && pnpm typecheck && pnpm test:unit && pnpm docs:check",
+    "build:worker": "node scripts/build-worker.mjs",
+    "docs:api": "node --import tsx scripts/api-docs.ts"
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "1.7.7",
@@ -44,6 +46,7 @@
     "@types/react-dom": "19.2.3",
     "@types/smtp-server": "3.5.12",
     "embedded-postgres": "18.4.0-beta.17",
+    "esbuild": "0.27.7",
     "smtp-server": "3.17.1",
     "tsx": "4.21.0",
     "typescript": "5.9.3"

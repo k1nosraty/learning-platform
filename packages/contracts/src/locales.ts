@@ -157,6 +157,7 @@ export const catalogs = {
 export type MessageKey = keyof typeof catalogs.en;
 export const errors = {
   en: {
+    RATE_LIMITED: "Too many invitations. Try again later.",
     FORBIDDEN: "You do not have permission for this action.",
     NOT_FOUND: "This item is unavailable.",
     UNAUTHENTICATED: "Please sign in again.",
@@ -178,6 +179,7 @@ export const errors = {
     BODY_TOO_LARGE: "The request is too large.",
   },
   fa: {
+    RATE_LIMITED: "تعداد دعوت‌ها بیش از حد مجاز است. بعداً تلاش کنید.",
     FORBIDDEN: "اجازه انجام این کار را ندارید.",
     NOT_FOUND: "این مورد در دسترس نیست.",
     UNAUTHENTICATED: "دوباره وارد شوید.",

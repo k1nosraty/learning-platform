@@ -228,16 +228,23 @@ export async function addRelationship(
     );
   });
 }
-export async function listRelationships(actor: Actor, ws: string) {
+export async function listRelationships(
+  actor: Actor,
+  ws: string,
+  cursor: string | undefined = undefined,
+  limit = 25,
+) {
   return tenantTransaction(actor, ws, false, async (c, m) => {
     if (m.role !== "owner" && m.role !== "manager")
       throw new DomainError("FORBIDDEN", 403);
-    return (
-      await c.query(
-        "SELECT id,manager_membership_id,learner_membership_id FROM manager_learner WHERE ($1='owner' OR manager_membership_id=$2) ORDER BY id LIMIT 100",
-        [m.role, m.id],
-      )
-    ).rows;
+    const r = await c.query(
+      "SELECT r.id,r.manager_membership_id,r.learner_membership_id,m.display_name AS manager_name,l.display_name AS learner_name FROM manager_learner r JOIN membership m ON (m.workspace_id,m.id)=(r.workspace_id,r.manager_membership_id) JOIN membership l ON (l.workspace_id,l.id)=(r.workspace_id,r.learner_membership_id) WHERE ($1='owner' OR r.manager_membership_id=$2) AND ($3::uuid IS NULL OR r.id>$3) ORDER BY r.id LIMIT $4",
+      [m.role, m.id, cursor ?? null, limit + 1],
+    );
+    return {
+      items: r.rows.slice(0, limit),
+      nextCursor: r.rows.length > limit ? r.rows[limit - 1].id : null,
+    };
   });
 }
 export async function removeRelationship(actor: Actor, ws: string, id: string) {
@@ -261,6 +268,14 @@ export async function createInvitation(
   return tenantTransaction(actor, ws, true, async (c, m, w) => {
     requireGrant(m.role, input.role, w.type);
     return command(c, actor, ws, "invitation.create", key, input, async () => {
+      if (input.managerMembershipId && input.role !== "learner")
+        throw new DomainError("INVALID_RELATIONSHIP", 422);
+      const volume = await c.query(
+        "SELECT count(*)::int AS count FROM invitation WHERE inviter_membership_id=$1 AND created_at>now()-interval '1 hour'",
+        [m.id],
+      );
+      if (volume.rows[0].count >= 30)
+        throw new DomainError("RATE_LIMITED", 429);
       let managerId = input.managerMembershipId ?? null;
       if (m.role === "manager") {
         if (managerId && managerId !== m.id)
@@ -332,6 +347,7 @@ export async function revokeInvitation(
   ws: string,
   id: string,
   revision: number,
+  key: string,
 ) {
   return tenantTransaction(actor, ws, true, async (c, m, w) => {
     const r = await c.query("SELECT * FROM invitation WHERE id=$1 FOR UPDATE", [
@@ -342,16 +358,26 @@ export async function revokeInvitation(
     requireGrant(m.role, i.role, w.type);
     if (m.role !== "owner" && i.inviter_membership_id !== m.id)
       throw new DomainError("FORBIDDEN", 403);
-    if (i.revision !== revision)
-      throw new DomainError("REVISION_CONFLICT", 409);
-    if (i.status !== "pending")
-      throw new DomainError("INVITATION_INVALID", 409);
-    await c.query(
-      "UPDATE invitation SET status='revoked',revision=revision+1 WHERE id=$1",
-      [id],
+    return command(
+      c,
+      actor,
+      ws,
+      "invitation.revoke",
+      key,
+      { id, expectedRevision: revision },
+      async () => {
+        if (i.revision !== revision)
+          throw new DomainError("REVISION_CONFLICT", 409);
+        if (i.status !== "pending")
+          throw new DomainError("INVITATION_INVALID", 409);
+        await c.query(
+          "UPDATE invitation SET status='revoked',revision=revision+1 WHERE id=$1",
+          [id],
+        );
+        await audit(c, actor, ws, "invitation.revoked", id);
+        return { id };
+      },
     );
-    await audit(c, actor, ws, "invitation.revoked", id);
-    return { id };
   });
 }
 export async function acceptInvitation(actor: Actor, token: string) {

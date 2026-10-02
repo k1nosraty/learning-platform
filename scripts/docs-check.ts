@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readdir, readFile } from "node:fs/promises";
 import { catalogs, errors } from "../packages/contracts/src/locales";
+import { foundationOpenApi } from "../packages/contracts/src/openapi";
 
 for (const catalog of [catalogs, errors])
   assert.deepEqual(
@@ -22,4 +23,9 @@ assert.equal(schema.$schema, "https://json-schema.org/draft/2020-12/schema");
 assert.ok((await readdir("docs")).length >= 24);
 console.log(
   "Documentation schema and fa/en catalog key/placeholder parity passed.",
+);
+
+assert.deepEqual(
+  JSON.parse(await readFile("docs/api/foundation.openapi.json", "utf8")),
+  foundationOpenApi(),
 );

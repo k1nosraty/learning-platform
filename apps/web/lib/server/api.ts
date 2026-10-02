@@ -13,8 +13,12 @@ const parse = async (request: Request) => {
   if (Buffer.byteLength(raw) > 16384)
     throw new DomainError("BODY_TOO_LARGE", 413);
   try {
-    return JSON.parse(raw);
-  } catch {
+    const input: unknown = JSON.parse(raw);
+    if (!input || typeof input !== "object" || Array.isArray(input))
+      throw new DomainError("VALIDATION_ERROR", 422);
+    return input as Record<string, unknown>;
+  } catch (error) {
+    if (error instanceof DomainError) throw error;
     throw new DomainError("INVALID_JSON", 400);
   }
 };
@@ -143,17 +147,18 @@ export async function handleApi(request: Request) {
             ws,
             id,
             contract.revoke.parse(input).expectedRevision,
+            key(request),
           );
         } else if (
           path.length === 3 &&
           sub === "manager-learners" &&
           method === "GET"
-        )
-          data = {
-            items: await service.listRelationships(actor, ws),
-            nextCursor: null,
-          };
-        else if (
+        ) {
+          const q = contract.listQuery.parse(
+            Object.fromEntries(url.searchParams),
+          );
+          data = await service.listRelationships(actor, ws, q.cursor, q.limit);
+        } else if (
           path.length === 3 &&
           sub === "manager-learners" &&
           method === "POST"

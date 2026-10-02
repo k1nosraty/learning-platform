@@ -154,6 +154,17 @@ test("A07 RLS blocks tenant substitution, no scope, cross-tenant references and 
     .items[0].id;
   await assert.rejects(
     () =>
+      actorTransaction(actors[0], async (c) => {
+        await setTenant(c, org);
+        await c.query(
+          "INSERT INTO manager_learner(workspace_id,manager_membership_id,learner_membership_id) VALUES($1,$2,$3)",
+          [org, foreignMember, learnerMember],
+        );
+      }),
+    (error) => (error as { code: string }).code === "23503",
+  );
+  await assert.rejects(
+    () =>
       s.addRelationship(
         actors[0],
         org,
@@ -206,7 +217,7 @@ test("A08 centralized grants, explicit relationships, last owner and personal bo
     denial("FORBIDDEN"),
   );
   const managed = await s.listRelationships(actors[1], org);
-  assert.equal(managed[0].learner_membership_id, learnerMember);
+  assert.equal(managed.items[0].learner_membership_id, learnerMember);
   const visible = await s.listMembers(actors[1], org, undefined);
   assert.equal(visible.items.length, 2);
   assert.ok(!visible.items.some((x) => x.id === ownerMember));
@@ -241,7 +252,12 @@ test("invitation identity, single consumption, expiry, revocation and changed in
     randomUUID(),
   );
   const revokedToken = await inviteToken(org, revoked.email);
-  await s.revokeInvitation(actors[0], org, i.id, i.revision);
+  const revokeKey = randomUUID();
+  await s.revokeInvitation(actors[0], org, i.id, i.revision, revokeKey);
+  assert.deepEqual(
+    await s.revokeInvitation(actors[0], org, i.id, i.revision, revokeKey),
+    { id: i.id },
+  );
   await assert.rejects(
     () => s.acceptInvitation(revoked, revokedToken),
     denial("INVITATION_INVALID"),
@@ -336,6 +352,55 @@ test("commands replay, reject changed payload, CAS rejects stale changes, remova
     denial("NOT_FOUND"),
   );
   assert.ok(!(await s.listWorkspaces(actors[2])).some((w) => w.id === org));
+});
+test("concurrent owner demotion serializes and preserves an active owner", async () => {
+  const ws = (
+    await s.createOrganization(
+      actors[0],
+      { name: "Owner race", timezone: "UTC", defaultLocale: "en" },
+      randomUUID(),
+    )
+  ).id;
+  const second = await actor("second-owner@local.test");
+  await s.createInvitation(
+    actors[0],
+    ws,
+    { email: second.email, role: "owner" },
+    randomUUID(),
+  );
+  const accepted = await s.acceptInvitation(
+    second,
+    await inviteToken(ws, second.email),
+  );
+  const original = (await s.listMembers(actors[0], ws, undefined)).items.find(
+    (m) => m.id !== accepted.membershipId,
+  );
+  assert.ok(original);
+  const outcomes = await Promise.allSettled([
+    s.updateMember(actors[0], ws, original.id, {
+      role: "learner",
+      status: "active",
+      expectedRevision: 1,
+    }),
+    s.updateMember(second, ws, accepted.membershipId, {
+      role: "learner",
+      status: "active",
+      expectedRevision: 1,
+    }),
+  ]);
+  assert.equal(outcomes.filter((x) => x.status === "fulfilled").length, 1);
+  const rejected = outcomes.find((x) => x.status === "rejected");
+  assert.ok(
+    rejected &&
+      rejected.status === "rejected" &&
+      rejected.reason instanceof DomainError &&
+      rejected.reason.code === "LAST_OWNER",
+  );
+  const owners = await env.admin.query(
+    "SELECT count(*)::int AS count FROM membership WHERE workspace_id=$1 AND role='owner' AND status='active'",
+    [ws],
+  );
+  assert.equal(owners.rows[0].count, 1);
 });
 test("A16 real signup, SMTP verification, database sessions, APIs, recovery and revoked sessions", async () => {
   const auth = getAuth();
@@ -433,6 +498,61 @@ test("A16 real signup, SMTP verification, database sessions, APIs, recovery and 
       method: "PATCH",
       headers: { cookie, origin, "Content-Type": "application/json" },
       body: JSON.stringify({ preferredLocale: "en", role: "owner" }),
+    }),
+  );
+  assert.equal(api.status, 422);
+  assert.ok(session);
+  const authenticatedActor: Actor = {
+    ...session.user,
+    preferredLocale: session.user.preferredLocale ?? "fa",
+  };
+  const invitation = await s.createInvitation(
+    actors[0],
+    org,
+    { email: authenticatedActor.email, role: "learner" },
+    randomUUID(),
+  );
+  while (await deliverOnce(env.worker)) {}
+  const invitationMessage = env.messages.find(
+    (raw) =>
+      raw.includes("To: flow@local.test") &&
+      links(raw).some((link) => link.includes("/invite?")),
+  );
+  assert.ok(invitationMessage);
+  const invitationLink = links(invitationMessage).find((link) =>
+    link.includes("/invite?"),
+  );
+  assert.ok(invitationLink);
+  api = await handleApi(
+    new Request(`${origin}/api/v1/invitations/accept`, {
+      method: "POST",
+      headers: { cookie, origin, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token: new URL(invitationLink).searchParams.get("token"),
+      }),
+    }),
+  );
+  assert.equal(api.status, 200, await api.clone().text());
+  const accepted = (await api.json()).data;
+  api = await handleApi(
+    new Request(`${origin}/api/v1/workspaces/${org}`, { headers: { cookie } }),
+  );
+  assert.equal(api.status, 200);
+  await s.updateMember(actors[0], org, accepted.membershipId, {
+    role: "learner",
+    status: "removed",
+    expectedRevision: 1,
+  });
+  api = await handleApi(
+    new Request(`${origin}/api/v1/workspaces/${org}`, { headers: { cookie } }),
+  );
+  assert.equal(api.status, 404);
+  assert.ok(invitation.id);
+  api = await handleApi(
+    new Request(`${origin}/api/v1/workspaces/${personal}/settings`, {
+      method: "PATCH",
+      headers: { cookie, origin, "Content-Type": "application/json" },
+      body: "null",
     }),
   );
   assert.equal(api.status, 422);

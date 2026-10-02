@@ -30,6 +30,8 @@ interface Relationship {
   id: string;
   manager_membership_id: string;
   learner_membership_id: string;
+  manager_name: string;
+  learner_name: string;
 }
 interface Page<T> {
   items: T[];
@@ -52,7 +54,12 @@ export function WorkspaceAdmin({
     items: [],
     nextCursor: null,
   });
-  const [relationships, setRelationships] = useState<Relationship[]>([]);
+  const [relationships, setRelationships] = useState<Page<Relationship>>({
+    items: [],
+    nextCursor: null,
+  });
+  const [candidates, setCandidates] = useState<Member[]>([]);
+  const [relationCursor, setRelationCursor] = useState<string>();
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
@@ -71,13 +78,35 @@ export function WorkspaceAdmin({
         api<Page<Invitation>>(
           `${base}/invitations${inviteCursor ? `?cursor=${inviteCursor}` : ""}`,
         ),
-        api<Page<Relationship>>(`${base}/manager-learners`),
+        api<Page<Relationship>>(
+          `${base}/manager-learners${relationCursor ? `?cursor=${relationCursor}` : ""}`,
+        ),
       ]);
       setMembers(m);
       setInvitations(i);
-      setRelationships(r.items);
+      setRelationships(r);
+      if (owner) {
+        let cursor: string | null = null;
+        const all: Member[] = [];
+        do {
+          const page: Page<Member> = await api<Page<Member>>(
+            `${base}/members?limit=100${cursor ? `&cursor=${cursor}` : ""}`,
+          );
+          all.push(...page.items);
+          cursor = page.nextCursor;
+        } while (cursor);
+        setCandidates(all.filter((m) => m.status === "active"));
+      }
     }
-  }, [base, admin, organization, memberCursor, inviteCursor]);
+  }, [
+    base,
+    admin,
+    owner,
+    organization,
+    memberCursor,
+    inviteCursor,
+    relationCursor,
+  ]);
   useEffect(() => {
     let current = true;
     load().catch((e) => {
@@ -292,11 +321,16 @@ export function WorkspaceAdmin({
               {owner && (
                 <label>
                   {t.optionalManager}
-                  <input
-                    name="managerMembershipId"
-                    dir="ltr"
-                    placeholder="UUID"
-                  />
+                  <select name="managerMembershipId">
+                    <option value="">{t.none}</option>
+                    {candidates
+                      .filter((m) => m.role === "manager")
+                      .map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.display_name} — {m.email}
+                        </option>
+                      ))}
+                  </select>
                 </label>
               )}
               <button type="submit" disabled={busy}>
@@ -380,46 +414,44 @@ export function WorkspaceAdmin({
               >
                 <label>
                   {t.managerMember}
-                  <input
-                    name="managerMembershipId"
-                    dir="ltr"
-                    placeholder="UUID"
-                    required
-                  />
+                  <select name="managerMembershipId" required>
+                    <option value="">{t.none}</option>
+                    {candidates
+                      .filter((m) => m.role === "manager")
+                      .map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.display_name} — {m.email}
+                        </option>
+                      ))}
+                  </select>
                 </label>
                 <label>
                   {t.learnerMember}
-                  <input
-                    name="learnerMembershipId"
-                    dir="ltr"
-                    placeholder="UUID"
-                    required
-                  />
+                  <select name="learnerMembershipId" required>
+                    <option value="">{t.none}</option>
+                    {candidates
+                      .filter((m) => m.role === "learner")
+                      .map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.display_name} — {m.email}
+                        </option>
+                      ))}
+                  </select>
                 </label>
                 <button type="submit" disabled={busy}>
                   {t.assignRelationship}
                 </button>
               </form>
             )}
-            {relationships.length === 0 && <p>{t.empty}</p>}
-            {relationships.map((r) => (
+            {relationships.items.length === 0 && <p>{t.empty}</p>}
+            {relationships.items.map((r) => (
               <div className="row" key={r.id}>
                 <div className="row-details">
                   <p>
-                    {t.manager}:{" "}
-                    <bdi>
-                      {members.items.find(
-                        (m) => m.id === r.manager_membership_id,
-                      )?.display_name ?? r.manager_membership_id}
-                    </bdi>
+                    {t.manager}: <bdi>{r.manager_name}</bdi>
                   </p>
                   <p>
-                    {t.learner}:{" "}
-                    <bdi>
-                      {members.items.find(
-                        (m) => m.id === r.learner_membership_id,
-                      )?.display_name ?? r.learner_membership_id}
-                    </bdi>
+                    {t.learner}: <bdi>{r.learner_name}</bdi>
                   </p>
                 </div>
                 {owner && (
@@ -438,6 +470,28 @@ export function WorkspaceAdmin({
                 )}
               </div>
             ))}
+            <div className="pagination">
+              {relationCursor && (
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => setRelationCursor(undefined)}
+                >
+                  {t.firstPage}
+                </button>
+              )}
+              {relationships.nextCursor && (
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() =>
+                    setRelationCursor(relationships.nextCursor ?? undefined)
+                  }
+                >
+                  {t.nextPage}
+                </button>
+              )}
+            </div>
           </section>
         </>
       )}

@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 import { catalogs } from "../../../packages/contracts/src/locales";
 import type { Locale } from "../../../packages/domain/src/workspaces/permissions";
 import { authClient } from "../lib/auth-client";
@@ -17,6 +17,9 @@ export function Shell({
   const t = catalogs[locale];
   const path = usePathname();
   const router = useRouter();
+  useEffect(() => {
+    document.cookie = `locale=${locale}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
+  }, [locale]);
   async function change(next: Locale) {
     document.cookie = `locale=${next}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
     if (signedIn) {
