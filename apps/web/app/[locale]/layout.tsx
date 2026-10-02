@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
-import { isLocale } from "../../../../packages/contracts/src/locales";
+import { catalogs, isLocale } from "../../../../packages/contracts/src/locales";
 import "../styles.css";
 export default async function Layout({
   children,
@@ -17,7 +17,12 @@ export default async function Layout({
     </html>
   );
 }
-export const metadata = {
-  title: "Learning Platform",
-  description: "Learning workspaces for individuals and teams",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const t = catalogs[isLocale(locale) ? locale : "en"];
+  return { title: t.brand, description: t.intro };
+}

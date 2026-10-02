@@ -1,6 +1,6 @@
 # Learning Platform
 
-فاز اول در حال پیاده‌سازی و اعتبارسنجی است: احراز هویت، فضای شخصی و سازمانی، اعضا، دعوت‌ها و رابط فارسی/انگلیسی. راهنمای اجرا و وضعیت تست‌ها در [Foundation](docs/FOUNDATION.md) آمده است. استقرار عمومی انجام نشده است.
+فاز اول پیاده‌سازی شده و تست‌های آن در گیت‌هاب پاس شده‌اند: احراز هویت، فضای شخصی و سازمانی، اعضا، دعوت‌ها و رابط فارسی/انگلیسی. راهنمای اجرا و وضعیت تست‌ها در [Foundation](docs/FOUNDATION.md) آمده است. استقرار عمومی انجام نشده است.
 
 هدف: محتوایی که کاربر از قبل دارد—README، متن یا برنامهٔ آموزشی—به یک مسیر یادگیری قابل‌پیگیری تبدیل شود. استفادهٔ شخصی ساده بماند و شرکت بتواند همان هسته را برای تخصیص مسیر، بررسی شواهد و گزارش‌گیری به کار بگیرد.
 
@@ -46,4 +46,4 @@ The production repository structure is documented in [Repository structure](docs
 
 ## Next action
 
-Validate **Phase 1 — Foundation** using the commands and evidence in [Foundation](docs/FOUNDATION.md). Phase 2 content editing/import remains outside this change.
+**Phase 1 — Foundation** is implemented and validated; see [Foundation](docs/FOUNDATION.md) for setup and CI evidence. The next development slice is **Phase 2 — Content engine** (editor, validation, import and immutable publication).

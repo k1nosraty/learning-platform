@@ -1,6 +1,6 @@
 # Phase 1 — Foundation
 
-Status: implemented, validation in progress on `develop`. No public deployment.
+Status: Phase 1 implemented on `develop`; Foundation gate passed in GitHub Actions. No public deployment.
 
 ## Run locally
 
@@ -53,7 +53,24 @@ pnpm test:e2e
 
 Integration/E2E each create an isolated real PostgreSQL 18.4 cluster and real SMTP receiver, provision distinct roles, apply migrations twice, and remove the database afterwards. They require an ordinary system user because PostgreSQL rejects root. No SQLite/fake-database alternative is accepted for the tenant gate. GitHub Actions runs checks, database tests and Chromium independently.
 
-Local evidence: four unit tests, lint, TypeScript, generated OpenAPI/catalog checks and optimized web/worker builds pass. The initial Foundation CI run also passed all six database tests and both Chromium tests on Ubuntu 24.04: [run 37028506434](https://github.com/k1nosraty/learning-platform/actions/runs/37028506434). Final refinements add named member selectors, invitation throttling, recipient-locale persistence and owner-race/API-revocation coverage; they are being revalidated in CI. The current managed execution environment cannot create/switch Linux users, so native PostgreSQL tests are blocked locally. Native PostgreSQL execution is validated in CI; local blocking does not count as a passing test. Production SMTP/provider configuration, backup/restore/load and deployment rehearsal remain pilot gates.
+Validation on 2026-10-02:
+
+| Check | Result | Environment |
+| --- | --- | --- |
+| Frozen installation / dependency compatibility | Pass | Node 24.19.0 / pnpm 11.25.0; clean GitHub runner |
+| Lint / strict TypeScript / catalog and generated OpenAPI parity | Pass | Local + CI |
+| Unit tests | 4 passed | Local + CI |
+| PostgreSQL integration | 7 passed | Actual PostgreSQL 18.4, separate runtime/auth/worker roles, Ubuntu 24.04 |
+| Chromium E2E | 2 passed | Real verified onboarding + SMTP, Persian RTL/mobile, organization/settings, English preference and keyboard journey |
+| Optimized web / bundled worker build | Pass | Local + CI |
+| Production dependency audit | No reported vulnerabilities | `pnpm audit --prod` at validation time |
+
+Evidence: [validated code commit d16f38a](https://github.com/k1nosraty/learning-platform/commit/d16f38a6ac628debb3e8091faf9242763859191f) and [green run 37029905359](https://github.com/k1nosraty/learning-platform/actions/runs/37029905359). The final locale-aware error/title refinement is checked by the same workflow, including a Persian 404 assertion. [Latest Foundation runs](https://github.com/k1nosraty/learning-platform/actions?query=workflow%3AFoundation) are the authoritative status for later commits.
+
+A07/A08/A16 Foundation coverage includes tenant ID substitution, no-context RLS/pool reuse, database composite-FK rejection, fixed grant escalation, manager relationship scope, last-owner protection under concurrent changes, immediate membership revocation through the API with an existing session, mismatched/revoked/expired/stale invitations, duplicate acceptance, idempotency conflicts/revocation replay, CAS, real verification/recovery/invitation SMTP links, reset session revocation, trusted Origin and strict inputs. Content, evidence, file and report aspects of those scenarios belong to later phases.
+
+The managed local execution environment cannot create/switch Linux users, so PostgreSQL integration and browser journeys were executed on ordinary-user GitHub runners instead. Local blocking does not count as a passing test. Docker image builds are not claimed: Docker is unavailable here. Production SMTP/provider configuration, backup/restore/load and deployment rehearsal remain pilot gates.
+
 
 ## Operational limits
 

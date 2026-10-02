@@ -82,4 +82,8 @@ test("English forms support keyboard focus and switch to Persian before sign-in"
   await page.getByLabel("Language", { exact: true }).selectOption("fa");
   await expect(page).toHaveURL(/\/fa\/login/);
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+  await page.goto("/fa/workspaces/invalid-id");
+  await expect(
+    page.getByRole("heading", { name: "صفحه پیدا نشد" }),
+  ).toBeVisible();
 });

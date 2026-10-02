@@ -21,3 +21,8 @@ Report exact dependency versions, actual setup commands, implemented Phase 1 beh
 ## Before any public launch
 
 Finish requested implementation scope and concrete checks first. Then use the user's actual hosting/publishing instruction. This package does not select a cloud account, create credentials or grant publishing authorization. No permission prompt is needed for routine local docs/code work already authorized by an implementation request.
+
+
+## Current implementation
+
+Phase 1 Foundation is implemented on `develop`. Read [Foundation setup and evidence](docs/FOUNDATION.md) before proceeding. This original handoff remains the initial scope/invariants; the next slice is Phase 2 Content engine.

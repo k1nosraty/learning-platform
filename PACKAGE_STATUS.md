@@ -13,6 +13,10 @@ Multilingual refinement: complete Persian/English UI, authentication messages, e
 - Repository structure, development gates, security/operations plan and implementation handoff.
 - Static document/link/schema/example validation results are included in VALIDATION.md after checking.
 
+## Foundation implementation
+
+Phase 1 is implemented on `develop`: verified auth/recovery, personal/organization workspaces, fixed memberships, secure invitations, explicit manager relationships, migrations/RLS, encrypted SMTP worker and complete fa/en Foundation surfaces. Four unit, seven PostgreSQL integration and two Chromium tests passed in CI; see [implementation and evidence](docs/FOUNDATION.md).
+
 ## Deliberately not claimed
 
 Phase 1 source and executable migrations now exist on `develop`; see docs/FOUNDATION.md for validation status. Content/progress/reviews/reports/AI, runtime load/restore testing and production deployment are not implemented. Planning examples are fixtures, not a mocked live product. Proposed runtime/dependency versions and providers must pass the specified phase gates.
@@ -25,4 +29,4 @@ Where a detailed rule narrows an ambiguous first-scope statement, use the linked
 
 ## Next step
 
-Complete the Foundation validation gate before beginning Phase 2. Contingent infrastructure/provider choices are enumerated with an owner/gate in docs/24.
+The Foundation gate passed; the next authorized development slice can be Phase 2. Contingent infrastructure/provider choices are enumerated with an owner/gate in docs/24.
