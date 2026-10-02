@@ -1,6 +1,6 @@
-# Learning Platform — Pre-Implementation Package
+# Learning Platform
 
-این پوشه بستهٔ طراحی پروژه است. هنوز اپلیکیشن، migration اجرایی یا سرویس مستقرشده‌ای ندارد. اسناد فنی به انگلیسی نوشته شده‌اند تا مستقیماً مبنای توسعه قرار بگیرند.
+فاز اول در حال پیاده‌سازی و اعتبارسنجی است: احراز هویت، فضای شخصی و سازمانی، اعضا، دعوت‌ها و رابط فارسی/انگلیسی. راهنمای اجرا و وضعیت تست‌ها در [Foundation](docs/FOUNDATION.md) آمده است. استقرار عمومی انجام نشده است.
 
 هدف: محتوایی که کاربر از قبل دارد—README، متن یا برنامهٔ آموزشی—به یک مسیر یادگیری قابل‌پیگیری تبدیل شود. استفادهٔ شخصی ساده بماند و شرکت بتواند همان هسته را برای تخصیص مسیر، بررسی شواهد و گزارش‌گیری به کار بگیرد.
 
@@ -29,9 +29,9 @@
 
 The original specifications express the long-term vision. MVP scope narrows the first release. Detailed documents refine its behavior; a refinement must not silently add deferred features or weaken isolation/history/privacy. Conflicts are resolved explicitly in an ADR and updated across affected documents.
 
-Design status is **proposed baseline ready for implementation planning**. The user authorized preparation of this package, not a public launch or application deployment. No infrastructure credentials or application source code are required to understand it.
+Design documents remain the scope baseline. Phase 1 implementation is authorized on `develop`; public deployment is a separate action.
 
-The production repository structure is documented in [Repository structure](docs/19-REPOSITORY-STRUCTURE.md). Application folders and commands are created in Phase 1; empty source scaffolds are deliberately absent from this planning package.
+The production repository structure is documented in [Repository structure](docs/19-REPOSITORY-STRUCTURE.md). Application folders and executable commands now implement the Foundation slice.
 
 ## Non-negotiable invariants
 
@@ -46,4 +46,4 @@ The production repository structure is documented in [Repository structure](docs
 
 ## Next action
 
-When ready, ask to begin **Phase 1 — Foundation**. First validate exact package versions and adapter compatibility, then implement identity, personal/organization workspaces, permissions and tenant-boundary tests. Continue according to the gated roadmap, not by generating all features at once.
+Validate **Phase 1 — Foundation** using the commands and evidence in [Foundation](docs/FOUNDATION.md). Phase 2 content editing/import remains outside this change.

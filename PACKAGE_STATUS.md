@@ -15,7 +15,7 @@ Multilingual refinement: complete Persian/English UI, authentication messages, e
 
 ## Deliberately not claimed
 
-No application source, executable migrations, live auth flow, storage deployment, real AI run, generated application PDF, runtime performance test or production deployment exists yet. Planning examples are fixtures, not a mocked live product. Proposed runtime/dependency versions and providers must pass the specified phase gates.
+Phase 1 source and executable migrations now exist on `develop`; see docs/FOUNDATION.md for validation status. Content/progress/reviews/reports/AI, runtime load/restore testing and production deployment are not implemented. Planning examples are fixtures, not a mocked live product. Proposed runtime/dependency versions and providers must pass the specified phase gates.
 
 ## Design clarifications relative to the first MVP document
 
@@ -25,4 +25,4 @@ Where a detailed rule narrows an ambiguous first-scope statement, use the linked
 
 ## Next step
 
-Begin Phase 1 when requested. There is no reason to create more speculative architecture documents before proving the chosen foundation. Contingent infrastructure/provider choices are enumerated with an owner/gate in docs/24.
+Complete the Foundation validation gate before beginning Phase 2. Contingent infrastructure/provider choices are enumerated with an owner/gate in docs/24.

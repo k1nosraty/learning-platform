@@ -1,0 +1,11 @@
+{
+  "name": "@learning/web",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "node ../../scripts/web.mjs dev",
+    "build": "node ../../scripts/web.mjs build",
+    "start": "node ../../scripts/web.mjs start"
+  },
+  "type": "module"
+}

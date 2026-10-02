@@ -1,0 +1,52 @@
+{
+  "name": "learning-platform",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @learning/web dev",
+    "dev:worker": "node --import tsx apps/worker/src/main.ts",
+    "build": "pnpm --filter @learning/web build",
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "node --import tsx --test tests/unit/*.test.ts",
+    "test:integration": "node --import tsx --test --test-concurrency=1 tests/integration/*.test.ts",
+    "test:e2e": "playwright test",
+    "db:migrate": "node --import tsx scripts/migrate.ts",
+    "db:seed": "node --import tsx scripts/seed.ts",
+    "docs:check": "node --import tsx scripts/docs-check.ts",
+    "check": "pnpm lint && pnpm typecheck && pnpm test:unit && pnpm docs:check"
+  },
+  "dependencies": {
+    "@better-auth/drizzle-adapter": "1.7.7",
+    "@tailwindcss/postcss": "4.3.3",
+    "better-auth": "1.7.7",
+    "dotenv": "17.2.3",
+    "drizzle-orm": "0.45.3",
+    "next": "16.3.8",
+    "nodemailer": "10.0.13",
+    "pg": "8.16.3",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "tailwindcss": "4.3.3",
+    "zod": "4.3.6"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.3.11",
+    "@playwright/test": "1.58.2",
+    "@types/node": "24.10.1",
+    "@types/nodemailer": "8.0.2",
+    "@types/pg": "8.15.6",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "@types/smtp-server": "3.5.12",
+    "embedded-postgres": "18.4.0-beta.17",
+    "smtp-server": "3.17.1",
+    "tsx": "4.21.0",
+    "typescript": "5.9.3"
+  },
+  "type": "module"
+}

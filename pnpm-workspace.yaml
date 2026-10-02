@@ -1,0 +1,7 @@
+packages:
+  - apps/*
+  - packages/*
+allowBuilds:
+  '@embedded-postgres/linux-x64': true
+  esbuild: true
+  sharp: true

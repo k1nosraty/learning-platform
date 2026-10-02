@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:18.4
+    environment:
+      POSTGRES_DB: learning
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: development
+    ports: ["127.0.0.1:5432:5432"]
+    volumes:
+      - postgres-data:/var/lib/postgresql
+      - ./infra/init-roles.sql:/docker-entrypoint-initdb.d/01-roles.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d learning"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  mailpit:
+    image: axllent/mailpit:v1.29.2
+    ports: ["127.0.0.1:1025:1025", "127.0.0.1:8025:8025"]
+volumes:
+  postgres-data:
