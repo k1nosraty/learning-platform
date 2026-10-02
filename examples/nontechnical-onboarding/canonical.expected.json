@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "1.0",
+  "title": "Employee onboarding sample",
+  "description": "Generic nontechnical training with three required units.",
+  "language": "en",
+  "nodes": [
+    {
+      "id": "safety",
+      "kind": "lesson",
+      "parentId": null,
+      "order": 0,
+      "title": "Workplace safety",
+      "body": "# Workplace safety\n\nRead the organization safety procedure and identify the emergency contact.\n",
+      "estimatedMinutes": null,
+      "difficulty": null,
+      "tags": [],
+      "completion": {
+        "required": true,
+        "rule": "self"
+      },
+      "resourceUrl": null
+    },
+    {
+      "id": "first-day",
+      "kind": "lesson",
+      "parentId": null,
+      "order": 1,
+      "title": "First-day checklist",
+      "body": "# First-day checklist\n\nComplete the tracked account task.\n",
+      "estimatedMinutes": null,
+      "difficulty": null,
+      "tags": [],
+      "completion": null,
+      "resourceUrl": null
+    },
+    {
+      "id": "account",
+      "kind": "task",
+      "parentId": "first-day",
+      "order": 0,
+      "title": "Check account access",
+      "body": "# Check account access\n\nConfirm the test account can open the onboarding portal. Do not submit credentials.\n",
+      "estimatedMinutes": null,
+      "difficulty": null,
+      "tags": [],
+      "completion": {
+        "required": true,
+        "rule": "self"
+      },
+      "resourceUrl": null
+    },
+    {
+      "id": "day-summary",
+      "kind": "project",
+      "parentId": null,
+      "order": 2,
+      "title": "First-day summary",
+      "body": "# First-day summary\n\nWrite a short summary and self-confirm completion; evidence can be attached.\n",
+      "estimatedMinutes": null,
+      "difficulty": null,
+      "tags": [],
+      "completion": {
+        "required": true,
+        "rule": "self"
+      },
+      "resourceUrl": null
+    }
+  ]
+}

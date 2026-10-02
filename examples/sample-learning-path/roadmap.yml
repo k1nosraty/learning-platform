@@ -1,0 +1,103 @@
+schemaVersion: '1.0'
+title: Infrastructure learning sample
+description: Four required units and one optional exercise.
+language: en
+nodes:
+- id: fundamentals
+  kind: stage
+  parentId: null
+  order: 0
+  title: Infrastructure fundamentals
+  estimatedMinutes: null
+  difficulty: null
+  tags: []
+  completion: null
+  resourceUrl: null
+  file: modules/fundamentals.md
+- id: networking
+  kind: module
+  parentId: fundamentals
+  order: 0
+  title: Networking
+  estimatedMinutes: null
+  difficulty: null
+  tags: []
+  completion: null
+  resourceUrl: null
+  file: modules/networking.md
+- id: ip-basics
+  kind: lesson
+  parentId: networking
+  order: 0
+  title: Addressing and diagnostics
+  estimatedMinutes: null
+  difficulty: null
+  tags: []
+  completion: null
+  resourceUrl: null
+  file: modules/ip-basics.md
+- id: inspect-config
+  kind: task
+  parentId: ip-basics
+  order: 0
+  title: Inspect configuration
+  estimatedMinutes: null
+  difficulty: null
+  tags: []
+  completion:
+    required: true
+    rule: self
+  resourceUrl: null
+  file: modules/inspect-config.md
+- id: test-connectivity
+  kind: task
+  parentId: ip-basics
+  order: 1
+  title: Test connectivity
+  estimatedMinutes: null
+  difficulty: null
+  tags: []
+  completion:
+    required: true
+    rule: self
+  resourceUrl: null
+  file: modules/test-connectivity.md
+- id: packet-exercise
+  kind: exercise
+  parentId: ip-basics
+  order: 2
+  title: Optional packet exercise
+  estimatedMinutes: null
+  difficulty: null
+  tags: []
+  completion:
+    required: false
+    rule: self
+  resourceUrl: null
+  file: modules/packet-exercise.md
+- id: work-safety
+  kind: lesson
+  parentId: fundamentals
+  order: 1
+  title: Lab safety and documentation
+  estimatedMinutes: null
+  difficulty: null
+  tags: []
+  completion:
+    required: true
+    rule: self
+  resourceUrl: null
+  file: modules/work-safety.md
+- id: network-lab
+  kind: project
+  parentId: fundamentals
+  order: 2
+  title: Small network lab
+  estimatedMinutes: null
+  difficulty: null
+  tags: []
+  completion:
+    required: true
+    rule: approval
+  resourceUrl: null
+  file: projects/network-lab.md

@@ -1,0 +1,55 @@
+schemaVersion: '1.0'
+title: Employee onboarding sample
+description: Generic nontechnical training with three required units.
+language: en
+nodes:
+- id: safety
+  kind: lesson
+  parentId: null
+  order: 0
+  title: Workplace safety
+  estimatedMinutes: null
+  difficulty: null
+  tags: []
+  completion:
+    required: true
+    rule: self
+  resourceUrl: null
+  file: modules/safety.md
+- id: first-day
+  kind: lesson
+  parentId: null
+  order: 1
+  title: First-day checklist
+  estimatedMinutes: null
+  difficulty: null
+  tags: []
+  completion: null
+  resourceUrl: null
+  file: modules/first-day.md
+- id: account
+  kind: task
+  parentId: first-day
+  order: 0
+  title: Check account access
+  estimatedMinutes: null
+  difficulty: null
+  tags: []
+  completion:
+    required: true
+    rule: self
+  resourceUrl: null
+  file: modules/account.md
+- id: day-summary
+  kind: project
+  parentId: null
+  order: 2
+  title: First-day summary
+  estimatedMinutes: null
+  difficulty: null
+  tags: []
+  completion:
+    required: true
+    rule: self
+  resourceUrl: null
+  file: projects/day-summary.md
