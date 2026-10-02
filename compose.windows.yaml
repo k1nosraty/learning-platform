@@ -1,0 +1,83 @@
+# Separate local stack: no host Node, pnpm or PostgreSQL installation required.
+name: learning-platform-windows
+services:
+  postgres:
+    image: postgres:18.4
+    environment:
+      POSTGRES_DB: learning
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: development
+    volumes:
+      - windows-postgres-data:/var/lib/postgresql
+      - ./infra/init-roles.sql:/docker-entrypoint-initdb.d/01-roles.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d learning"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+  mailpit:
+    image: axllent/mailpit:v1.29.2
+    ports: ["127.0.0.1:8025:8025"]
+    restart: unless-stopped
+  migrate:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile
+      target: build
+    user: node
+    environment:
+      DATABASE_MIGRATION_URL: postgres://postgres:development@postgres:5432/learning
+    command: ["pnpm", "db:migrate"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+  web:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile
+      target: local
+    environment:
+      APP_URL: http://localhost:3000
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Run start-windows.bat first}
+      MAIL_ENCRYPTION_KEY: ${MAIL_ENCRYPTION_KEY:?Run start-windows.bat first}
+      DATABASE_URL: postgres://learning_app:development-app@postgres:5432/learning
+      DATABASE_AUTH_URL: postgres://learning_auth:development-auth@postgres:5432/learning
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      SMTP_SECURE: "false"
+      SMTP_FROM: Learning Platform <no-reply@localhost.test>
+    ports: ["127.0.0.1:3000:3000"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/en/register').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      start_period: 15s
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      mailpit:
+        condition: service_started
+    restart: unless-stopped
+  worker:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile
+      target: worker
+    environment:
+      NODE_ENV: development
+      MAIL_ENCRYPTION_KEY: ${MAIL_ENCRYPTION_KEY:?Run start-windows.bat first}
+      DATABASE_WORKER_URL: postgres://learning_worker:development-worker@postgres:5432/learning
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      SMTP_SECURE: "false"
+      SMTP_FROM: Learning Platform <no-reply@localhost.test>
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      mailpit:
+        condition: service_started
+    restart: unless-stopped
+volumes:
+  windows-postgres-data:

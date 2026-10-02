@@ -4,6 +4,8 @@ Status: Phase 1 implemented on `develop`; Foundation gate passed in GitHub Actio
 
 ## Run locally
 
+**Windows:** use [start-windows.bat](../start-windows.bat) for prerequisite setup and the full local container stack; see [Windows guide](WINDOWS.md). The commands below remain available for manual development.
+
 Use Node 24 and pnpm 11.25.0 as an ordinary (non-root) system user. Versions are pinned in package manifests and pnpm-lock.yaml. PostgreSQL 18.4 is the runtime database; the embedded-postgres beta tag describes the test harness wrapper, not a beta PostgreSQL server.
 
 ```sh

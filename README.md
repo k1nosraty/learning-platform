@@ -6,6 +6,8 @@
 
 ## Start here
 
+برای اجرای ویندوز، پوشهٔ کامل شاخهٔ `develop` را دانلود و استخراج کن و روی **[start-windows.bat](start-windows.bat)** دوبار کلیک کن. پیش‌نیازها آماده می‌شوند و برنامه در مرورگر باز می‌شود. راهنمای نصب، ری‌استارت احتمالی و توقف: [Windows](docs/WINDOWS.md).
+
 1. Read [Product vision](docs/01-PRODUCT-VISION.md), [User stories](docs/02-USER-STORIES.md), and [MVP scope](docs/03-MVP-SCOPE.md).
 2. Read [Domain model](docs/04-DOMAIN-MODEL.md), [Content model](docs/08-CONTENT-MODEL.md), and [Markdown specification](docs/09-MARKDOWN-SPEC.md).
 3. Read [Architecture](docs/05-ARCHITECTURE.md), [Database](docs/06-DATABASE.md), [Permissions](docs/07-PERMISSIONS.md), and [Security](docs/13-SECURITY.md).

@@ -1,0 +1,48 @@
+name: Windows launcher
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  powershell:
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Parse using built-in Windows PowerShell 5.1
+        shell: powershell
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $PWD 'scripts/windows.ps1'), [ref]$tokens, [ref]$errors) | Out-Null
+          if ($errors.Count) { $errors | Format-List; exit 1 }
+  containers:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24.19.0
+      - name: Generate isolated test configuration
+        run: |
+          python3 - <<'PY'
+          import secrets
+          from pathlib import Path
+          Path('.env.windows').write_text('BETTER_AUTH_SECRET=' + secrets.token_hex(32) + '\nMAIL_ENCRYPTION_KEY=' + secrets.token_hex(32) + '\n')
+          PY
+      - run: docker compose --env-file .env.windows -f compose.windows.yaml config --quiet
+      - run: docker compose --env-file .env.windows -f compose.windows.yaml up --detach --build --wait --wait-timeout 180
+      - run: node scripts/container-smoke.mjs
+      - name: Restart with persisted database and rerun migrations
+        run: |
+          docker compose --env-file .env.windows -f compose.windows.yaml stop
+          docker compose --env-file .env.windows -f compose.windows.yaml up --detach --build --wait --wait-timeout 180
+          node scripts/container-smoke.mjs --existing
+      - name: Failure logs
+        if: failure()
+        run: docker compose --env-file .env.windows -f compose.windows.yaml logs --tail 100
+      - name: Clean isolated CI stack
+        if: always()
+        run: docker compose --env-file .env.windows -f compose.windows.yaml down --volumes
