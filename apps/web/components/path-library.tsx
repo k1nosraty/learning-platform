@@ -286,6 +286,7 @@ export function PathLibrary({
             <label>
               {t.paste}
               <textarea
+                aria-label={t.paste}
                 rows={6}
                 dir="auto"
                 value={text}
