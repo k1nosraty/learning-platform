@@ -98,7 +98,8 @@ if (!process.argv.includes("--existing")) {
     signal: AbortSignal.timeout(60_000),
   });
   assert.equal(imported.status, 200, await imported.clone().text());
-  const preview = (await imported.json()).data;
+  const created = (await imported.json()).data;
+  const preview = await api(`/imports/${created.id}`);
   assert.deepEqual(preview.errors, []);
   const confirmed = await api(`/imports/${preview.id}/confirm`, "POST", {
     canonical: preview.canonical,

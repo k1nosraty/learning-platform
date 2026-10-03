@@ -90,12 +90,12 @@ test("content 1.0 schema and all healthy fixtures share one canonical validator 
     assert.deepEqual(preview.errors, []);
     assert.deepEqual(preview.canonical, expected);
     if (name === "sample-learning-path")
-      assert.equal(
+      assert.deepEqual(
         propose(
           files.filter((f) => f.name === "single-file.md"),
           "structured",
-        ).canonical?.nodes.length,
-        expected.nodes.length,
+        ).canonical,
+        expected,
       );
     const exported = await exportPackage(expected),
       parsed = propose(await readArchive(exported), "structured");

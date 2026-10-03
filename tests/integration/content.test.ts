@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { after, before, test } from "node:test";
+import { Pool } from "pg";
 import { ZipFile } from "yazl";
 import { handleApi } from "../../apps/web/lib/server/api";
 import {
@@ -23,6 +24,7 @@ import {
   type Actor,
   DomainError,
 } from "../../packages/domain/src/workspaces/permissions";
+import { migrate } from "../../scripts/migrate";
 import { environment } from "../helpers/environment";
 
 let env: Awaited<ReturnType<typeof environment>>,
@@ -109,6 +111,70 @@ after(async () => {
   await env?.stop();
 });
 
+test("Phase 1 database upgrades preserve existing identity/workspace data and repeat migrations without changing content schema", async () => {
+  const name = `upgrade_${randomUUID().replaceAll("-", "")}`;
+  await env.admin.query(`CREATE DATABASE ${name}`);
+  const url = new URL(process.env.DATABASE_MIGRATION_URL as string);
+  url.pathname = `/${name}`;
+  const pool = new Pool({ connectionString: url.toString() });
+  try {
+    const foundationSql = await readFile(
+      new URL(
+        "../../packages/database/migrations/0001_foundation.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+    await pool.query(foundationSql);
+    await pool.query(
+      "CREATE TABLE schema_migration(name text PRIMARY KEY, checksum text NOT NULL, applied_at timestamptz NOT NULL DEFAULT now())",
+    );
+    await pool.query(
+      "INSERT INTO schema_migration(name,checksum) VALUES('0001_foundation.sql',$1)",
+      [createHash("sha256").update(foundationSql).digest("hex")],
+    );
+    const user = randomUUID(),
+      workspace = randomUUID(),
+      member = randomUUID();
+    await pool.query(
+      "INSERT INTO identity.\"user\"(id,name,email,email_verified) VALUES($1,'Existing owner','upgrade@local.test',true)",
+      [user],
+    );
+    await pool.query(
+      "INSERT INTO workspace(id,type,name,personal_user_id) VALUES($1,'personal','Existing workspace',$2)",
+      [workspace, user],
+    );
+    await pool.query(
+      "INSERT INTO membership(id,workspace_id,user_id,role,display_name,email) VALUES($1,$2,$3,'owner','Existing owner','upgrade@local.test')",
+      [member, workspace, user],
+    );
+    await migrate(url.toString());
+    await migrate(url.toString());
+    assert.equal(
+      (await pool.query("SELECT name FROM workspace WHERE id=$1", [workspace]))
+        .rows[0].name,
+      "Existing workspace",
+    );
+    assert.equal(
+      (await pool.query("SELECT user_id FROM membership WHERE id=$1", [member]))
+        .rows[0].user_id,
+      user,
+    );
+    assert.equal(
+      (await pool.query("SELECT count(*)::int AS count FROM schema_migration"))
+        .rows[0].count,
+      2,
+    );
+    assert.equal(
+      (await pool.query("SELECT count(*)::int AS count FROM path_version"))
+        .rows[0].count,
+      0,
+    );
+  } finally {
+    await pool.end();
+    await env.admin.query(`DROP DATABASE ${name}`);
+  }
+});
 test("content drafts enforce active editor scope, real RLS, no-context isolation, strict candidate rejection and CAS races", async () => {
   const id = await populated();
   const read = await s.readDraft(actors[1], org, id);

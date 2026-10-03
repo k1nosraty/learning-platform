@@ -46,7 +46,7 @@ async function onboarding(page: Page, email: string, locale = "en") {
 }
 test("visual editor preserves unsaved work across fa/en, publishes a real personal snapshot, and keeps old version/export after further edits", async ({
   page,
-}) => {
+}, testInfo) => {
   const ws = await onboarding(page, "content-visual@local.test");
   await page.goto(`/en/workspaces/${ws}/paths`);
   await page.getByLabel("Path title", { exact: true }).fill("First roadmap");
@@ -76,6 +76,10 @@ test("visual editor preserves unsaved work across fa/en, publishes a real person
     .getByRole("button", { name: "ذخیره پیش‌نویس", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("ذخیره شد");
+  await page.screenshot({
+    path: testInfo.outputPath("persian-editor.png"),
+    fullPage: true,
+  });
   await page
     .getByRole("button", { name: "انتشار و شروع شخصی", exact: true })
     .click();
@@ -135,6 +139,10 @@ test("visual editor preserves unsaved work across fa/en, publishes a real person
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
+  await page.screenshot({
+    path: testInfo.outputPath("mobile-published-reader.png"),
+    fullPage: true,
+  });
 });
 test("ordinary Persian source creates an editable reviewed import, source ticks do not claim progress, and explicit conversion gates personal approval", async ({
   page,

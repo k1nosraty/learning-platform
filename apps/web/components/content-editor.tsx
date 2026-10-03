@@ -347,6 +347,7 @@ export function ContentEditor({
                 <label>
                   {t.completion}
                   <select
+                    aria-label={t.completion}
                     disabled={
                       disabled || (node.kind === "lesson" && !!taskChildren)
                     }

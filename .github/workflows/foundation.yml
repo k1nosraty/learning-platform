@@ -49,8 +49,10 @@ jobs:
         env:
           NEXT_TELEMETRY_DISABLED: '1'
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        if: failure()
+        if: always()
         with:
           name: playwright-report
-          path: playwright-report/
+          path: |
+            playwright-report/
+            test-results/
           retention-days: 3

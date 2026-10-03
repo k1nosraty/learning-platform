@@ -36,7 +36,7 @@ export function ImportPreview({
     [busy, setBusy] = useState(false),
     [message, setMessage] = useState(""),
     [issues, setIssues] = useState<ContentIssue[]>([]);
-  const confirmKey = useRef(crypto.randomUUID()),
+  const confirmIntent = useRef<{ request: string; key: string } | null>(null),
     persisted = useRef(true);
   useEffect(() => {
     let active = true;
@@ -82,16 +82,20 @@ export function ImportPreview({
     setBusy(true);
     setMessage("");
     setIssues([]);
+    const input = {
+      canonical: doc,
+      expectedRevision: preview.revision,
+      acknowledgeWarnings: ack,
+    };
+    const request = JSON.stringify(input);
+    if (confirmIntent.current?.request !== request)
+      confirmIntent.current = { request, key: crypto.randomUUID() };
     try {
       const result = await contentApi<{ id: string }>(
         `${base}/confirm`,
         "POST",
-        {
-          canonical: doc,
-          expectedRevision: preview.revision,
-          acknowledgeWarnings: ack,
-        },
-        confirmKey.current,
+        input,
+        confirmIntent.current.key,
       );
       try {
         sessionStorage.removeItem(storageKey);
@@ -106,7 +110,6 @@ export function ImportPreview({
           setPreview(fresh);
         }
       }
-      confirmKey.current = crypto.randomUUID();
     } finally {
       setBusy(false);
     }
