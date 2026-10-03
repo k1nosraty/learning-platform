@@ -48,4 +48,4 @@ The production repository structure is documented in [Repository structure](docs
 
 ## Next action
 
-**Phase 2 — Content engine** passed its gate on `develop`; see [Content](docs/CONTENT.md) for creation/import/publication/export and evidence. The next development slice is Phase 3 Learning, awaiting a separate start instruction.
+**Phase 2 — Content engine** passed its gate on `develop`; see [Content](docs/CONTENT.md) for creation/import/publication/export and evidence. The shared bilingual [visual system](docs/DESIGN.md) is implemented before Phase 3: responsive navigation, bundled typography, accessible forms and safe editing confirmations. Phase 3 Learning awaits a separate start instruction.

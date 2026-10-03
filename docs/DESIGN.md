@@ -1,6 +1,6 @@
 # Visual system and usability
 
-Status: implemented between Phases 2 and 3; validation in progress on `develop`. This is the shared foundation for future screens, not a new feature phase.
+Status: implemented and validated between Phases 2 and 3 on `develop`. This is the shared foundation for future screens, not a new feature phase.
 
 ## Direction
 
@@ -42,4 +42,9 @@ Responsive checkpoints: 320px minimum mobile, 390px mobile, 768px tablet, 1000px
 
 Local lint, TypeScript, unit tests, catalog/OpenAPI parity and production build pass. The browser suite adds a real verified-account journey for password visibility, skip navigation, modal keyboard behavior, edit cancellation and persisted publication. Axe scans check detectable WCAG 2/2.1 A/AA issues on public auth, workspaces, library, editor, mobile drawer, confirmation dialog and published reader; no rules or page regions are excluded. Desktop/Persian/mobile screenshots are retained in the CI report for visual review.
 
-Automated scans are evidence for the covered states, not a complete accessibility certification. Screen-reader/user research, broader device coverage and pilot load/performance remain the Phase 7 gates. Final run links and observed results will be recorded after validation.
+Automated scans are evidence for the covered states, not a complete accessibility certification. Screen-reader/user research, broader device coverage and pilot load/performance remain the Phase 7 gates. Validated implementation: `756e86a04459191aed49be1fdc6a4c249e3938d3`.
+
+- [Foundation CI](https://github.com/k1nosraty/learning-platform/actions/runs/37129609946): 11 unit, 15 PostgreSQL integration and 5 Chromium tests passed; lint, TypeScript, documentation/catalog checks and production build passed.
+- [Windows launcher CI](https://github.com/k1nosraty/learning-platform/actions/runs/37129609941): PowerShell and container smoke checks, including bundled font notices and private-asset restart persistence.
+- Nine real application screenshots were reviewed, including English login, Persian registration/workspaces/library/editor, a mobile navigation drawer and tablet/mobile published readers. Corrected capture positioning keeps sticky navigation at the top.
+- Covered accessibility scans reported zero violations without excluded rules/regions; keyboard focus restoration, Escape cancellation, selected-file clearing/pasted-text preservation, local font delivery and 320/390/768px overflow checks passed.

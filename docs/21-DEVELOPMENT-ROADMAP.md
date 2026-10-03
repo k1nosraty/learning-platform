@@ -1,6 +1,6 @@
 # Gated Development Roadmap
 
-Architecture package M0 and Phases 1 Foundation and 2 Content engine are delivered on `develop`; runtime evidence and setup are in [Foundation](FOUNDATION.md) and [Content](CONTENT.md). Phase 3 Learning awaits a separate start instruction. M1 is usable core without AI; M2 completes bounded AI conversion and pilot readiness. No time estimate is imposed before team/capacity evidence exists.
+Architecture package M0 and Phases 1 Foundation and 2 Content engine are delivered on `develop`; runtime evidence and setup are in [Foundation](FOUNDATION.md) and [Content](CONTENT.md). The shared [visual-system checkpoint](DESIGN.md) is delivered between Phases 2 and 3. Phase 3 Learning awaits a separate start instruction. M1 is usable core without AI; M2 completes bounded AI conversion and pilot readiness. No time estimate is imposed before team/capacity evidence exists.
 
 | Phase | Deliverable | Exit gate |
 | --- | --- | --- |

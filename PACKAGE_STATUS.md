@@ -21,6 +21,10 @@ Phase 1 is implemented on `develop`: verified auth/recovery, personal/organizati
 
 Phase 2 Content is implemented and validated: bilingual visual drafts, strict canonical validator, reviewed structured/ordinary imports, source provenance, CAS/idempotency, immutable publication, private attachments, ZIP export and atomic personal start. All 11 unit, 15 PostgreSQL integration and 4 Chromium tests pass; actual container persistence passes. See [Content evidence and boundaries](docs/CONTENT.md) and [ADR-013](adr/ADR-013-phase2-bounded-local-content.md).
 
+## Visual system checkpoint
+
+The shared fa/en visual system is implemented between Phases 2 and 3: self-hosted Inter/Vazirmatn, SVG identity, responsive workspace navigation, consistent forms/cards, truthful empty/loading states and safe keyboard-accessible confirmation dialogs. Validation now covers 11 unit, 15 PostgreSQL integration and 5 Chromium tests, including automated accessibility scans and desktop/mobile screenshots. See [visual system and evidence](docs/DESIGN.md).
+
 ## Deliberately not claimed
 
 Progress, evidence/review workflows, reports, AI, runtime load/restore testing and production deployment are not implemented. The minimal enrollment record supports personal start/version pinning only. Planning examples are fixtures, not a mocked live product. Full Windows desktop installation still requires an actual PC check.
