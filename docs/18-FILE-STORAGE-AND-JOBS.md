@@ -2,6 +2,8 @@
 
 ## Storage contract
 
+Implementation refinement: [ADR-013](../adr/ADR-013-phase2-bounded-local-content.md) supplies private mounted storage and bounded synchronous imports/exports for local Phase 2. The S3/distributed job contract below remains the target for evidence/report and public-pilot phases.
+
 Domain sees FileObject IDs; adapter supports put/get/delete/head using opaque keys. Development uses an S3-compatible local service; production uses compatible private object storage. Files never become public merely because a URL is guessable. Runtime credentials have least-privilege bucket/prefix access; bucket encryption and backups are deployment responsibilities.
 
 File lifecycle: allocated→uploading→validating→ready/rejected→expired/deleted. Authorize both upload initiation and final parent binding. A file uploaded for a logo cannot be rebound as another learner's evidence; purpose and ownership are immutable. Server computes hash and checks actual bytes; client MIME/size are hints only.

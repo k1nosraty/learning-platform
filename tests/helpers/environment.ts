@@ -24,6 +24,7 @@ export async function environment() {
     );
   const port = await freePort();
   const dir = await mkdtemp(join(tmpdir(), "learning-pg-"));
+  process.env.CONTENT_STORAGE_DIR = join(dir, "content");
   await chmod(dir, 0o755);
   const postgres = new EmbeddedPostgres({
     databaseDir: join(dir, "db"),

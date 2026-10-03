@@ -38,6 +38,7 @@ services:
       dockerfile: infra/Dockerfile
       target: local
     environment:
+      CONTENT_STORAGE_DIR: /app/content-storage
       APP_URL: http://localhost:3000
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Run start-windows.bat first}
       MAIL_ENCRYPTION_KEY: ${MAIL_ENCRYPTION_KEY:?Run start-windows.bat first}
@@ -48,6 +49,8 @@ services:
       SMTP_SECURE: "false"
       SMTP_FROM: Learning Platform <no-reply@localhost.test>
     ports: ["127.0.0.1:3000:3000"]
+    volumes:
+      - windows-content-data:/app/content-storage
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/en/register').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 5s
@@ -81,3 +84,4 @@ services:
     restart: unless-stopped
 volumes:
   windows-postgres-data:
+  windows-content-data:

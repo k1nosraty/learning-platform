@@ -9,10 +9,12 @@ export function Shell({
   locale,
   children,
   signedIn = false,
+  canChangeLocale,
 }: {
   locale: Locale;
   children: ReactNode;
   signedIn?: boolean;
+  canChangeLocale?: () => boolean;
 }) {
   const t = catalogs[locale];
   const path = usePathname();
@@ -21,6 +23,7 @@ export function Shell({
     document.cookie = `locale=${locale}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
   }, [locale]);
   async function change(next: Locale) {
+    if (canChangeLocale && !canChangeLocale()) return;
     document.cookie = `locale=${next}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
     if (signedIn) {
       const response = await fetch("/api/v1/me/preferences", {

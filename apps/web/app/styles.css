@@ -25,7 +25,8 @@ a {
 }
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 button,
@@ -50,7 +51,8 @@ button:disabled {
   border-color: var(--line);
 }
 input,
-select {
+select,
+textarea {
   width: 100%;
   background: #fff;
   border: 1px solid #8baba0;
@@ -228,6 +230,232 @@ input:focus-visible,
 select:focus-visible {
   outline: 3px solid #da960b;
   outline-offset: 3px;
+}
+.page-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.page-heading h1 {
+  overflow-wrap: anywhere;
+}
+.editor-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.editor-layout .card {
+  margin-bottom: 0;
+}
+.structure {
+  position: sticky;
+  top: 16px;
+  max-height: 85vh;
+  overflow: auto;
+}
+.node-add {
+  display: grid;
+  gap: 10px;
+}
+.node-tree {
+  list-style: none;
+  padding: 0;
+}
+.node-button {
+  display: grid;
+  width: 100%;
+  text-align: start;
+  margin-block: 4px;
+  background: transparent;
+  color: var(--ink);
+  border-color: transparent;
+  padding: 8px;
+  overflow-wrap: anywhere;
+}
+.node-button.selected {
+  background: #e6f1e8;
+  border-color: var(--accent);
+}
+.node-kind {
+  font-size: 12px;
+  color: var(--muted);
+}
+fieldset {
+  border: 0;
+  padding: 0;
+  min-width: 0;
+  display: grid;
+  gap: 18px;
+  margin: 0;
+}
+legend {
+  font-size: 14px;
+  color: var(--muted);
+  padding-bottom: 14px;
+}
+.node-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.node-toolbar .actions {
+  gap: 6px;
+}
+.editor-actions .actions {
+  flex-wrap: wrap;
+}
+textarea {
+  resize: vertical;
+  line-height: 1.6;
+}
+textarea:focus-visible {
+  outline: 3px solid #da960b;
+  outline-offset: 3px;
+}
+.delete-node {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+.danger {
+  color: #9f2525;
+}
+.approval-preview {
+  background: #fff9e9;
+  border-color: #d9b45d;
+}
+details summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding-block: 8px;
+}
+.issue-list {
+  display: grid;
+  gap: 10px;
+  max-height: 340px;
+  overflow: auto;
+  padding-inline-start: 24px;
+}
+.issue-list li {
+  overflow-wrap: anywhere;
+}
+.issue-list code,
+.issue-list bdi {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+}
+.source-panel {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 400px;
+  overflow: auto;
+  background: #f4f7f2;
+  padding: 16px;
+  border-radius: 10px;
+  font:
+    14px / 1.7 Consolas,
+    Tahoma,
+    monospace;
+}
+.hash {
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  color: var(--muted);
+}
+.summary-strip {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.summary-strip span {
+  background: #e6f1e8;
+  padding: 5px 12px;
+  border-radius: 20px;
+}
+.checkbox-label {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.checkbox-label input {
+  width: 22px;
+  min-height: 22px;
+  flex-shrink: 0;
+}
+.published-layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 24px;
+  margin-top: 28px;
+  align-items: start;
+}
+.published-layout nav {
+  position: sticky;
+  top: 16px;
+}
+.published-layout nav ol {
+  padding-inline-start: 20px;
+}
+.published-node {
+  scroll-margin-top: 24px;
+}
+.markdown {
+  overflow-wrap: anywhere;
+}
+.markdown pre {
+  overflow-x: auto;
+  background: #f4f7f2;
+  padding: 16px;
+  border-radius: 8px;
+  text-align: start;
+  direction: ltr;
+}
+.markdown code {
+  font-family: Consolas, monospace;
+}
+.markdown table {
+  display: block;
+  overflow: auto;
+  border-collapse: collapse;
+  max-width: 100%;
+}
+.markdown th,
+.markdown td {
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+}
+.markdown img {
+  max-width: 100%;
+  height: auto;
+}
+.markdown blockquote {
+  margin-inline: 0;
+  border-inline-start: 3px solid var(--line);
+  padding-inline-start: 18px;
+}
+@media (max-width: 800px) {
+  .editor-layout,
+  .published-layout {
+    grid-template-columns: 1fr;
+  }
+  .structure,
+  .published-layout nav {
+    position: static;
+    max-height: none;
+  }
+  .editor-actions .actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+  .node-toolbar .actions {
+    flex-wrap: wrap;
+  }
 }
 @media (max-width: 720px) {
   .topbar {

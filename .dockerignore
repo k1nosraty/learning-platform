@@ -4,6 +4,8 @@ node_modules
 **/.next
 .env
 .env.*
+.content-storage
+**/.content-storage
 dist
 playwright-report
 test-results

@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { contentCatalogs } from "../../../packages/contracts/src/content-locales";
 import { catalogs } from "../../../packages/contracts/src/locales";
 import type {
   Locale,
@@ -145,6 +146,18 @@ export function WorkspaceAdmin({
         {t[workspace.type]} · {t[workspace.role]}
       </span>
       <h1>{workspace.name}</h1>
+      {admin && (
+        <section className="card">
+          <h2>{contentCatalogs[locale].paths}</h2>
+          <p>{contentCatalogs[locale].importHint}</p>
+          <Link
+            className="button"
+            href={`/${locale}/workspaces/${workspace.id}/paths`}
+          >
+            {contentCatalogs[locale].paths}
+          </Link>
+        </section>
+      )}
       {error && (
         <p role="alert" className="error">
           {error}

@@ -1,9 +1,13 @@
 import assert from "node:assert/strict";
 import { readdir, readFile } from "node:fs/promises";
+import {
+  contentCatalogs,
+  contentIssues,
+} from "../packages/contracts/src/content-locales";
 import { catalogs, errors } from "../packages/contracts/src/locales";
 import { foundationOpenApi } from "../packages/contracts/src/openapi";
 
-for (const catalog of [catalogs, errors])
+for (const catalog of [catalogs, errors, contentCatalogs, contentIssues])
   assert.deepEqual(
     Object.keys(catalog.en).sort(),
     Object.keys(catalog.fa).sort(),
@@ -14,6 +18,14 @@ for (const [key, value] of Object.entries(catalogs.en)) {
   assert.deepEqual(
     placeholders(value),
     placeholders(catalogs.fa[key as keyof typeof catalogs.en]),
+  );
+}
+for (const [key, value] of Object.entries(contentCatalogs.en)) {
+  const placeholders = (s: string) =>
+    [...s.matchAll(/\{([a-zA-Z0-9_]+)\}/g)].map((m) => m[1]).sort();
+  assert.deepEqual(
+    placeholders(value),
+    placeholders(contentCatalogs.fa[key as keyof typeof contentCatalogs.en]),
   );
 }
 const schema = JSON.parse(

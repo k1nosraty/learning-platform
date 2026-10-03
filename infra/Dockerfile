@@ -7,6 +7,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm build
 
 FROM build AS local
+RUN mkdir -p /app/content-storage
 RUN chown -R node:node /app
 ENV NODE_ENV=development
 USER node

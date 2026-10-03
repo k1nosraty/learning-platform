@@ -48,4 +48,4 @@ The production repository structure is documented in [Repository structure](docs
 
 ## Next action
 
-**Phase 1 — Foundation** is implemented and validated; see [Foundation](docs/FOUNDATION.md) for setup and CI evidence. The next development slice is **Phase 2 — Content engine** (editor, validation, import and immutable publication).
+**Phase 2 — Content engine** is implemented and undergoing validation on `develop`; see [Content](docs/CONTENT.md) for creation/import/publication/export and its boundaries. Phase 3 learning/progress has not started.

@@ -4,12 +4,14 @@ import { sessionActor } from "../../../../packages/application/src/auth";
 import * as service from "../../../../packages/application/src/workspaces";
 import * as contract from "../../../../packages/contracts/src/foundation";
 import { translateError } from "../../../../packages/contracts/src/locales";
+import { ContentError } from "../../../../packages/domain/src/content";
 import { DomainError } from "../../../../packages/domain/src/workspaces/permissions";
+import { boundedBody, contentRequest } from "./content-api";
 
 const parse = async (request: Request) => {
   const length = Number(request.headers.get("content-length") ?? 0);
   if (length > 16384) throw new DomainError("BODY_TOO_LARGE", 413);
-  const raw = await request.text();
+  const raw = (await boundedBody(request, 16384)).toString("utf8");
   if (Buffer.byteLength(raw) > 16384)
     throw new DomainError("BODY_TOO_LARGE", 413);
   try {
@@ -51,13 +53,30 @@ export async function handleApi(request: Request) {
         throw new DomainError("UNTRUSTED_ORIGIN", 403);
       if (
         method !== "DELETE" &&
-        !request.headers.get("content-type")?.startsWith("application/json")
+        !request.headers.get("content-type")?.startsWith("application/json") &&
+        !(
+          path[0] === "workspaces" &&
+          path[2] === "imports" &&
+          path.length === 3 &&
+          method === "POST" &&
+          request.headers.get("content-type")?.startsWith("multipart/form-data")
+        )
       )
         throw new DomainError("INVALID_JSON", 400);
     }
     const actor = await sessionActor(request.headers);
     if (!actor) throw new DomainError("UNAUTHENTICATED", 401);
     if (!actor.emailVerified) throw new DomainError("EMAIL_NOT_VERIFIED", 403);
+    if (path[0] === "workspaces" && ["paths", "imports"].includes(path[2])) {
+      const result = await contentRequest(
+        request,
+        actor,
+        contract.uuid.parse(path[1]),
+        path,
+        requestId,
+      );
+      return result instanceof Response ? result : json(result);
+    }
     let data: unknown;
     if (path.join("/") === "me/preferences" && method === "PATCH") {
       const input = contract.preferences.parse(await parse(request));
@@ -203,7 +222,22 @@ export async function handleApi(request: Request) {
     if (status === 500)
       console.error(JSON.stringify({ event: "api_failure", requestId }));
     return json(
-      { error: { code, message: translateError(locale, code) } },
+      {
+        error: {
+          code,
+          message: translateError(locale, code),
+          ...(error instanceof ContentError
+            ? { details: error.issues }
+            : error instanceof ZodError
+              ? {
+                  details: error.issues.map((i) => ({
+                    code: "SCHEMA_INVALID",
+                    pointer: `/${i.path.join("/")}`,
+                  })),
+                }
+              : {}),
+        },
+      },
       status,
     );
   }

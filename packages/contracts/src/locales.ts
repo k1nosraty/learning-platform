@@ -75,7 +75,7 @@ export const catalogs = {
       "Could not complete the request. Check your credentials or try again.",
     verifyRequired: "Verify your email before signing in.",
     notFound: "Page not found",
-    help: "Foundation includes accounts, workspaces and membership management. Learning content comes in the next phase.",
+    help: "Create, import and publish learning content in your workspace.",
   },
   fa: {
     brand: "پلتفرم یادگیری",
@@ -151,12 +151,20 @@ export const catalogs = {
       "درخواست انجام نشد. اطلاعات ورود را بررسی کنید یا دوباره تلاش کنید.",
     verifyRequired: "پیش از ورود ایمیل خود را تأیید کنید.",
     notFound: "صفحه پیدا نشد",
-    help: "این مرحله شامل حساب، فضای کاری و مدیریت عضویت است. محتوای یادگیری در مرحله بعد اضافه می‌شود.",
+    help: "محتوای یادگیری را در فضای کاری خود بسازید، وارد و منتشر کنید.",
   },
 } as const;
 export type MessageKey = keyof typeof catalogs.en;
 export const errors = {
   en: {
+    CONTENT_INVALID: "Review the content validation issues.",
+    IMPORT_INVALID: "The source package could not be imported safely.",
+    PATH_ARCHIVED: "This path is archived and cannot be changed or started.",
+    PERSONAL_ONLY: "Personal start is available in a personal workspace.",
+    IMPORT_CLOSED: "This import has already been confirmed or cancelled.",
+    ACKNOWLEDGEMENT_REQUIRED:
+      "Review and acknowledge the import warnings first.",
+    FILE_UNAVAILABLE: "The private content file is unavailable.",
     RATE_LIMITED: "Too many invitations. Try again later.",
     FORBIDDEN: "You do not have permission for this action.",
     NOT_FOUND: "This item is unavailable.",
@@ -179,6 +187,13 @@ export const errors = {
     BODY_TOO_LARGE: "The request is too large.",
   },
   fa: {
+    CONTENT_INVALID: "ایرادهای اعتبارسنجی محتوا را بررسی کنید.",
+    IMPORT_INVALID: "بسته منبع به‌صورت امن قابل واردکردن نیست.",
+    PATH_ARCHIVED: "این مسیر بایگانی شده و قابل ویرایش یا شروع نیست.",
+    PERSONAL_ONLY: "شروع شخصی در فضای شخصی در دسترس است.",
+    IMPORT_CLOSED: "این واردکردن قبلاً تأیید یا لغو شده است.",
+    ACKNOWLEDGEMENT_REQUIRED: "ابتدا هشدارهای واردکردن را بررسی و تأیید کنید.",
+    FILE_UNAVAILABLE: "فایل خصوصی محتوا در دسترس نیست.",
     RATE_LIMITED: "تعداد دعوت‌ها بیش از حد مجاز است. بعداً تلاش کنید.",
     FORBIDDEN: "اجازه انجام این کار را ندارید.",
     NOT_FOUND: "این مورد در دسترس نیست.",

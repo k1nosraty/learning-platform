@@ -1,4 +1,5 @@
 import { z } from "zod";
+import * as content from "./content";
 import * as c from "./foundation";
 
 const models = {
@@ -10,6 +11,12 @@ const models = {
   AcceptInvitation: c.acceptInvite,
   Preferences: c.preferences,
   RevokeInvitation: c.revoke,
+  CanonicalContent: content.canonicalSchema,
+  CreatePath: content.createPathInput,
+  SaveDraft: content.saveDraftInput,
+  ContentTransition: content.transitionInput,
+  ImportText: content.importTextInput,
+  ConfirmImport: content.confirmImportInput,
 };
 const schema = (name: keyof typeof models) => ({
   $ref: `#/components/schemas/${name}`,
@@ -98,8 +105,8 @@ export function foundationOpenApi() {
   return {
     openapi: "3.1.0",
     info: {
-      title: "Learning Platform Foundation API",
-      version: "0.1.0",
+      title: "Learning Platform Foundation and Content API",
+      version: "0.2.0",
       description:
         "All actors/roles are resolved from the current database session and membership. Mutations require exact trusted Origin and application/json. expectedRevision is required on state edits. Auth endpoints are managed by Better Auth separately.",
     },
@@ -122,6 +129,152 @@ export function foundationOpenApi() {
       ),
     },
     paths: {
+      "/workspaces/{workspaceId}/paths": {
+        get: operation(
+          "Owner/manager private library, archived paths included",
+          undefined,
+          [ws],
+          true,
+        ),
+        post: operation(
+          "Create a schema-valid empty private draft",
+          "CreatePath",
+          [ws, key],
+        ),
+      },
+      "/workspaces/{workspaceId}/paths/{id}/draft": {
+        get: operation(
+          "Read authorized private draft and immutable version metadata",
+          undefined,
+          [ws, id],
+        ),
+        put: operation(
+          "Validate whole canonical candidate and CAS-replace the draft",
+          "SaveDraft",
+          [ws, id],
+        ),
+      },
+      ...Object.fromEntries(
+        ["publish", "start", "archive"].map((action) => [
+          `/workspaces/{workspaceId}/paths/{id}/${action}`,
+          {
+            post: operation(
+              action === "publish"
+                ? "Validate, derive nodes/units and seal an immutable version"
+                : action === "start"
+                  ? "Personal-only atomic publication and unique version-pinned participation"
+                  : "Archive path without changing any previous version",
+              "ContentTransition",
+              [ws, id, key],
+            ),
+          },
+        ]),
+      ),
+      "/workspaces/{workspaceId}/paths/{id}/versions/{versionId}": {
+        get: operation(
+          "Read sealed snapshot; current membership and version enrollment scope required",
+          undefined,
+          [ws, id, { ...id, name: "versionId" }],
+        ),
+      },
+      "/workspaces/{workspaceId}/paths/{id}/versions/{versionId}/export": {
+        get: {
+          ...operation(
+            "Synchronous authorized immutable Markdown ZIP export (no progress/private learning data)",
+            undefined,
+            [ws, id, { ...id, name: "versionId" }],
+          ),
+          responses: {
+            "200": {
+              description: "ZIP download",
+              content: {
+                "application/zip": {
+                  schema: { type: "string", format: "binary" },
+                },
+              },
+            },
+            "404": { description: "Missing or invisible version" },
+          },
+        },
+      },
+      "/workspaces/{workspaceId}/paths/{id}/versions/{versionId}/assets": {
+        get: {
+          ...operation(
+            "Current-authorized private asset proxy; no public/signed URL",
+            undefined,
+            [
+              ws,
+              id,
+              { ...id, name: "versionId" },
+              {
+                name: "name",
+                in: "query",
+                required: true,
+                schema: { type: "string" },
+              },
+            ],
+          ),
+          responses: {
+            "200": {
+              description:
+                "Bound PNG/JPEG/WebP image or PDF download; no-store",
+            },
+            "404": { description: "Invisible or unbound asset" },
+          },
+        },
+      },
+      "/workspaces/{workspaceId}/imports": {
+        post: {
+          ...operation(
+            "Synchronous bounded import proposal; no canonical draft/path until confirmation",
+            "ImportText",
+            [ws, key],
+          ),
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": { schema: schema("ImportText") },
+              "multipart/form-data": {
+                schema: {
+                  type: "object",
+                  additionalProperties: false,
+                  required: ["method", "file"],
+                  properties: {
+                    method: { type: "string", enum: ["loose", "structured"] },
+                    file: {
+                      type: "string",
+                      format: "binary",
+                      description:
+                        "One UTF-8 Markdown/text file up to 2 MiB or ZIP up to 20 MiB",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      "/workspaces/{workspaceId}/imports/{id}": {
+        get: operation(
+          "Own import preview; workspace owner can also read it; source expires after 30 days",
+          undefined,
+          [ws, id],
+        ),
+      },
+      "/workspaces/{workspaceId}/imports/{id}/confirm": {
+        post: operation(
+          "Revalidate reviewed canonical input, acknowledge warnings and create one private draft",
+          "ConfirmImport",
+          [ws, id, key],
+        ),
+      },
+      "/workspaces/{workspaceId}/imports/{id}/cancel": {
+        post: operation(
+          "Cancel preview with revision; cannot confirm afterwards",
+          "ContentTransition",
+          [ws, id, key],
+        ),
+      },
       "/workspaces": {
         get: operation(
           "List current active workspaces (also ensures verified personal onboarding)",

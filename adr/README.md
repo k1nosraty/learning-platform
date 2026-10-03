@@ -16,5 +16,6 @@ Status of all records: **proposed design baseline**, dated 2026-10-02. “Propos
 | [ADR-010](ADR-010-files-outbox.md) | Private storage, outbox and idempotent workers |
 | [ADR-011](ADR-011-api-boundary.md) | REST boundary over shared application services |
 | [ADR-012](ADR-012-mvp-progressive-complexity.md) | Personal simplicity and explicit scope cuts |
+| [ADR-013](ADR-013-phase2-bounded-local-content.md) | Accepted bounded synchronous content operations and private local storage refinement |
 
 When changing a decision, record context, alternatives, consequences, affected contracts and verification. Supersede the old decision explicitly; do not delete history. Library/product branding is not a reason to rename domain entities.

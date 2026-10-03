@@ -21,6 +21,7 @@ test("Persian verified onboarding, personal workspace, organization settings and
       const mails = await (await request.get("http://127.0.0.1:3101")).json();
       verification =
         mails
+          .filter((m: { raw: string }) => m.raw.includes("browser@local.test"))
           .flatMap((m: { links: string[] }) => m.links)
           .find((x: string) => x.includes("/verify-email")) ?? "";
       return !!verification;

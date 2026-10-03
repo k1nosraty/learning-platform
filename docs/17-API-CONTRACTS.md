@@ -12,6 +12,8 @@ Creation/transition commands use `Idempotency-Key` (UUID/random opaque <=128 cha
 
 ## Endpoint map
 
+Phase 2 uses bounded synchronous import preview and read-only `GET /paths/{id}/versions/{versionId}/export` ZIP downloads instead of the proposed queued transport for local content operations. See [Content implementation](CONTENT.md) and [ADR-013](../adr/ADR-013-phase2-bounded-local-content.md). Report/evidence/AI jobs remain future endpoints.
+
 Paths below are relative to the workspace prefix except global workspace routes.
 
 | Method/path | Input | Result and checks |
