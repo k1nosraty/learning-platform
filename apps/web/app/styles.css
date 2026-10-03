@@ -1722,3 +1722,41 @@ body:has(dialog[open]) {
   max-width: 650px;
   margin: 50px auto;
 }
+.upload-zone {
+  position: relative;
+  display: block;
+  min-width: 0;
+  border: 1px dashed #bccdc6;
+  border-radius: 12px;
+  background: #fafcfb;
+}
+.upload-zone:hover {
+  border-color: var(--accent);
+  background: #f1f7f2;
+}
+.upload-zone:focus-within {
+  outline: 3px solid #177d70;
+  outline-offset: 3px;
+}
+input.file-picker {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  padding: 0;
+}
+.upload-prompt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 16px;
+  color: var(--accent);
+  font-size: 13px;
+  min-width: 0;
+}
+.upload-prompt > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

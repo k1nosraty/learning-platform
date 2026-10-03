@@ -40,7 +40,7 @@ export const contentCatalogs = {
       "This draft changed elsewhere. Your local edits are kept; reload the saved draft before merging your changes.",
     publishedMessage: "Immutable version published.",
     startedMessage:
-      "Your personal participation is pinned to this version. Progress tracking arrives in Phase 3.",
+      "Your personal participation is linked to this published version.",
     archiveMessage: "Path archived; published versions remain available.",
     versions: "Published versions",
     version: "Version",
@@ -172,8 +172,7 @@ export const contentCatalogs = {
     conflict:
       "این پیش‌نویس جای دیگری تغییر کرده است. ویرایش‌های محلی حفظ شده‌اند؛ پیش از ادغام، نسخه ذخیره‌شده را بارگذاری کنید.",
     publishedMessage: "نسخه تغییرناپذیر منتشر شد.",
-    startedMessage:
-      "شرکت شخصی شما به این نسخه متصل شد. پیگیری پیشرفت در فاز ۳ اضافه می‌شود.",
+    startedMessage: "شرکت شخصی شما به این نسخهٔ منتشرشده متصل شد.",
     archiveMessage: "مسیر بایگانی شد؛ نسخه‌های منتشرشده در دسترس می‌مانند.",
     versions: "نسخه‌های منتشرشده",
     version: "نسخه",

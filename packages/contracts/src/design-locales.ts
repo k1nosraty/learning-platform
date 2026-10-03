@@ -43,6 +43,7 @@ export const designCatalogs = {
     pathsAction: "Open learning paths",
     pathsHint: "Create, import and organize the content in this workspace.",
     clearFile: "Remove selected file",
+    chooseFile: "Choose a file",
     fileHint: "Markdown, text or ZIP · up to 20 MiB for ZIP",
     selectedFile: "Selected file",
     saveHint: "Save changes before publishing. Published versions stay fixed.",
@@ -117,6 +118,7 @@ export const designCatalogs = {
     pathsAction: "باز کردن مسیرهای یادگیری",
     pathsHint: "محتوای این فضای کاری را بسازید، وارد و مرتب کنید.",
     clearFile: "حذف فایل انتخاب‌شده",
+    chooseFile: "انتخاب فایل",
     fileHint: "Markdown، متن یا ZIP · حداکثر ۲۰ مگابایت برای ZIP",
     selectedFile: "فایل انتخاب‌شده",
     saveHint:

@@ -7,6 +7,9 @@ import { setTimeout } from "node:timers/promises";
 const origin = "http://localhost:3000";
 const email = "windows-smoke@example.test";
 const password = "Isolated-CI-password-2026!";
+const license = await fetch(`${origin}/font-licenses.txt`);
+assert.equal(license.status, 200);
+assert.match(await license.text(), /SIL OPEN FONT LICENSE Version 1.1/);
 const post = (path, body) =>
   fetch(`${origin}/api/auth/${path}`, {
     method: "POST",

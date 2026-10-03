@@ -295,12 +295,20 @@ export function PathLibrary({
             </label>
             <label>
               {t.upload}
-              <input
-                ref={upload}
-                type="file"
-                accept=".md,.markdown,.txt,.zip"
-                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-              />
+              <span className="upload-zone">
+                <input
+                  ref={upload}
+                  className="file-picker"
+                  aria-label={t.upload}
+                  type="file"
+                  accept=".md,.markdown,.txt,.zip"
+                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                />
+                <span className="upload-prompt">
+                  <Icon name="upload" />
+                  <span>{file ? <bdi>{file.name}</bdi> : d.chooseFile}</span>
+                </span>
+              </span>
             </label>
             <p className="hint">{d.fileHint}</p>
             {file && (

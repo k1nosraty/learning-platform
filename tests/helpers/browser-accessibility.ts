@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, type Page } from "@playwright/test";
+import { expect, type Page, type TestInfo } from "@playwright/test";
 export async function accessible(page: Page) {
   await page.evaluate(() => document.fonts.ready);
   const result = await new AxeBuilder({ page })
@@ -22,4 +22,19 @@ export async function fitsViewport(page: Page) {
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
+}
+
+export async function capture(
+  page: Page,
+  info: TestInfo,
+  name: string,
+  fullPage = true,
+) {
+  await page.evaluate(() => {
+    if (document.activeElement instanceof HTMLElement)
+      document.activeElement.blur();
+    window.scrollTo(0, 0);
+  });
+  await page.waitForFunction(() => window.scrollY === 0);
+  await page.screenshot({ path: info.outputPath(name), fullPage });
 }

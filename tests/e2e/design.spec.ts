@@ -1,12 +1,23 @@
 import { expect, test } from "@playwright/test";
-import { accessible, fitsViewport } from "../helpers/browser-accessibility";
+import {
+  accessible,
+  capture,
+  fitsViewport,
+} from "../helpers/browser-accessibility";
 import { onboarding } from "../helpers/browser-onboarding";
 
 test("bilingual visual system, keyboard navigation and safe editing work on real desktop/mobile pages", async ({
   page,
 }, info) => {
   test.setTimeout(150000);
+  const fonts: string[] = [];
+  page.on("request", (request) => {
+    if (request.resourceType() === "font") fonts.push(request.url());
+  });
   await page.goto("/en/login");
+  const license = await page.request.get("/font-licenses.txt");
+  expect(license.status()).toBe(200);
+  expect(await license.text()).toContain("SIL OPEN FONT LICENSE Version 1.1");
   await page.getByLabel("Email", { exact: true }).fill("design@local.test");
   await page
     .getByLabel("Password", { exact: true })
@@ -26,10 +37,10 @@ test("bilingual visual system, keyboard navigation and safe editing work on real
     "password",
   );
   await accessible(page);
-  await page.screenshot({
-    path: info.outputPath("english-login-desktop.png"),
-    fullPage: true,
-  });
+  expect(
+    await page.evaluate(() => document.fonts.check('16px "Inter Variable"')),
+  ).toBe(true);
+  await capture(page, info, "english-login-desktop.png");
   await page
     .getByRole("link", { name: "Skip to content", exact: true })
     .focus();
@@ -38,18 +49,21 @@ test("bilingual visual system, keyboard navigation and safe editing work on real
   await page.setViewportSize({ width: 320, height: 800 });
   await page.goto("/fa/register");
   await accessible(page);
+  expect(
+    await page.evaluate(() =>
+      document.fonts.check('16px "Vazirmatn Variable"'),
+    ),
+  ).toBe(true);
+  expect(fonts.length).toBeGreaterThan(0);
+  expect(
+    fonts.every((url) => new URL(url).origin === "http://127.0.0.1:3100"),
+  ).toBe(true);
   await fitsViewport(page);
-  await page.screenshot({
-    path: info.outputPath("persian-register-mobile.png"),
-    fullPage: true,
-  });
+  await capture(page, info, "persian-register-mobile.png");
   const ws = await onboarding(page, "visual-design@local.test", "fa");
   await page.setViewportSize({ width: 1440, height: 1000 });
   await accessible(page);
-  await page.screenshot({
-    path: info.outputPath("persian-workspaces-desktop.png"),
-    fullPage: true,
-  });
+  await capture(page, info, "persian-workspaces-desktop.png");
   await page.goto(`/fa/workspaces/${ws}/paths`);
   await expect(
     page.getByRole("heading", {
@@ -58,10 +72,27 @@ test("bilingual visual system, keyboard navigation and safe editing work on real
     }),
   ).toBeVisible();
   await accessible(page);
-  await page.screenshot({
-    path: info.outputPath("persian-library-empty.png"),
-    fullPage: true,
+  await capture(page, info, "persian-library-empty.png");
+  await page
+    .getByLabel("متن منبع را بچسبانید", { exact: true })
+    .fill("# Retained pasted source");
+  await page.getByLabel("یا فایلی انتخاب کنید", { exact: true }).setInputFiles({
+    name: "README.md",
+    mimeType: "text/markdown",
+    buffer: Buffer.from("# Imported source"),
   });
+  await expect(
+    page.getByLabel("متن منبع را بچسبانید", { exact: true }),
+  ).toBeDisabled();
+  await page
+    .getByRole("button", { name: "حذف فایل انتخاب‌شده", exact: true })
+    .click();
+  await expect(
+    page.getByLabel("متن منبع را بچسبانید", { exact: true }),
+  ).toBeEnabled();
+  await expect(
+    page.getByLabel("متن منبع را بچسبانید", { exact: true }),
+  ).toHaveValue("# Retained pasted source");
   await page
     .getByLabel("عنوان مسیر", { exact: true })
     .fill("مسیر طراحی آزمایشی");
@@ -83,10 +114,7 @@ test("bilingual visual system, keyboard navigation and safe editing work on real
     page.getByRole("dialog", { name: "ناوبری اصلی", exact: true }),
   ).toBeVisible();
   await accessible(page);
-  await page.screenshot({
-    path: info.outputPath("persian-mobile-navigation.png"),
-    fullPage: true,
-  });
+  await capture(page, info, "persian-mobile-navigation.png", false);
   await page.keyboard.press("Escape");
   await expect(
     page.getByRole("button", { name: "باز کردن منو", exact: true }),
@@ -104,6 +132,9 @@ test("bilingual visual system, keyboard navigation and safe editing work on real
   ).toBeFocused();
   await accessible(page);
   await page.keyboard.press("Escape");
+  await expect(
+    page.getByRole("button", { name: "حذف بخش و زیرمجموعه‌هایش", exact: true }),
+  ).toBeFocused();
   await expect(page.getByLabel("عنوان بخش", { exact: true })).toHaveValue(
     "درس اول",
   );
@@ -122,10 +153,7 @@ test("bilingual visual system, keyboard navigation and safe editing work on real
     "درس اول",
   );
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.screenshot({
-    path: info.outputPath("persian-editor-desktop.png"),
-    fullPage: true,
-  });
+  await capture(page, info, "persian-editor-desktop.png");
   await page
     .getByRole("button", { name: "انتشار و شروع شخصی", exact: true })
     .click();
@@ -140,8 +168,5 @@ test("bilingual visual system, keyboard navigation and safe editing work on real
     await page.setViewportSize({ width, height: 844 });
     await fitsViewport(page);
   }
-  await page.screenshot({
-    path: info.outputPath("published-tablet.png"),
-    fullPage: true,
-  });
+  await capture(page, info, "published-tablet.png");
 });
