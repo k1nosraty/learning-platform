@@ -1,4 +1,4 @@
-# Run Foundation on Windows
+# Run the learning platform on Windows
 
 1. Download/clone the **develop** branch and extract the entire project to a local folder (not inside the ZIP).
 2. Double-click **start-windows.bat** in that folder.
@@ -21,7 +21,7 @@ Use a currently supported Windows desktop version meeting [Docker Desktop's requ
 
 `.env.windows` is created only on the first launch with cryptographically random authentication and mail encryption keys. It is excluded from Git and Docker build contexts. Preserve this file: resetting the keys invalidates sessions and can make pending email unreadable. An existing malformed file produces an error rather than being overwritten. The normal `.env` and normal `compose.yaml` setup are independent.
 
-The Windows stack uses the named Docker volume `learning-platform-windows_windows-postgres-data`. Stopping, closing the launcher window, restarting Windows or rebuilding containers preserves accounts and workspaces. Never remove that volume if you need its data. Keep this project folder and configuration when upgrading the source; only one Windows stack runs at a time on these ports.
+The Windows stack uses the named Docker volumes `learning-platform-windows_windows-postgres-data` and `learning-platform-windows_windows-content-data`. Stopping, closing the launcher window, restarting Windows or rebuilding containers preserves accounts, workspaces, content versions and private attachments. Preserve both volumes together: the database stores attachment bindings and the content volume stores their bytes. Keep this project folder and configuration when upgrading the source; only one Windows stack runs at a time on these ports.
 
 ## Troubleshooting
 
@@ -33,6 +33,6 @@ The Windows stack uses the named Docker volume `learning-platform-windows_window
 
 ## Execution boundary and validation
 
-This is the local **Foundation** development stack, accessible through loopback ports. Web and worker use development mode so HTTP localhost and local SMTP work; production HTTPS/SMTP guards remain enabled in production. It does not add Phase 2 content features or configure public hosting. Application, identity and email worker still use separate database roles; migrations run before the web/worker start. Runtime containers run as the ordinary `node` user.
+This is the local **Foundation and Content engine** development stack, accessible through loopback ports. Web and worker use development mode so HTTP localhost and local SMTP work; production HTTPS/SMTP guards remain enabled in production. It includes the bilingual editor, reviewed imports, immutable publication and ZIP export; see [Content](CONTENT.md). Application, identity and email worker use separate database roles; migrations run before the web/worker start. Runtime containers run as the ordinary `node` user.
 
-CI checks PowerShell syntax using Windows PowerShell 5.1 and boots the actual Docker stack on Linux, exercising real registration, verification mail, login and repeated startup against the same persisted database. Full Docker Desktop installation, UAC, WSL and reboot behavior must be confirmed on an actual Windows PC; hosted Windows CI cannot validate that desktop setup flow.
+CI checks PowerShell syntax using Windows PowerShell 5.1 and boots the actual Docker stack on Linux, exercising real registration, verification mail, login, content import/publication/export and repeated startup against the same persisted database and private attachment volume. Full Docker Desktop installation, UAC, WSL and reboot behavior must be confirmed on an actual Windows PC; hosted Windows CI cannot validate that desktop setup flow.

@@ -407,6 +407,9 @@ function structured(
     n.body = rewriteMarkdown(n.body, (url) => resolve(url, file));
     if (n.resourceUrl) n.resourceUrl = resolve(n.resourceUrl, file);
   }
+  p.canonical.description = rewriteMarkdown(p.canonical.description, (url) =>
+    resolve(url, `${root}README.md`),
+  );
   for (const f of files)
     if (
       /\.md$/i.test(f.name) &&
@@ -569,7 +572,9 @@ function loose(files: PackageFile[], p: Proposal) {
           }
     }
   }
-  p.canonical = doc;
+  const shape = canonicalSchema.safeParse(doc);
+  if (shape.success) p.canonical = shape.data;
+  else p.errors.push({ code: "SCHEMA_INVALID", pointer: "" });
 }
 function exportPath(n: ContentNode) {
   const slug =
@@ -593,6 +598,9 @@ export async function exportPackage(doc: Canonical, assets: Asset[] = []) {
   };
   const manifest = {
     ...doc,
+    description: rewriteMarkdown(doc.description, (url) =>
+      rewrite(url, "README.md"),
+    ),
     nodes: doc.nodes.map((n) => {
       const { body, ...meta } = n;
       const file = exportPath(n);
@@ -606,7 +614,7 @@ export async function exportPackage(doc: Canonical, assets: Asset[] = []) {
   const zip = new ZipWriter();
   zip.addBuffer(
     Buffer.from(
-      `# ${doc.title}\n\n${doc.description}\n\n${doc.nodes
+      `# ${doc.title}\n\n${rewriteMarkdown(doc.description, (url) => rewrite(url, "README.md"))}\n\n${doc.nodes
         .filter((n) => n.parentId === null)
         .sort((a, b) => a.order - b.order)
         .map(

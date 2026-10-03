@@ -1,6 +1,8 @@
 import { createHash } from "node:crypto";
 import Ajv2020 from "ajv/dist/2020.js";
-import portableSchema from "../../../schemas/learning-path-draft.schema.json";
+import portableSchema from "../../../schemas/learning-path-draft.schema.json" with {
+  type: "json",
+};
 import {
   type Canonical,
   type ContentIssue,
@@ -45,6 +47,7 @@ export function safeUrl(value: string): boolean {
     const u = new URL(value);
     return (
       u.protocol === "https:" &&
+      /^https:\/\//i.test(value) &&
       !u.username &&
       !u.password &&
       !/[\p{Cc}\s\\]/u.test(value)
@@ -158,8 +161,17 @@ export function validateContent(
     )
       add("PERSONAL_APPROVAL", `${p}/completion`);
   });
-  for (const link of markdownLinks(doc.description))
+  for (const link of markdownLinks(doc.description)) {
     if (!safeUrl(link.url)) add("UNSAFE_URL", "/description");
+    if (link.url.startsWith("#node-") && !byId.has(link.url.slice(6)))
+      add("MISSING_NODE_LINK", "/description");
+    if (
+      link.url.startsWith("assets/") &&
+      options.assets &&
+      !options.assets.includes(link.url)
+    )
+      add("MISSING_ASSET", "/description");
+  }
   if (options.publish && !doc.nodes.some((n) => n.completion?.required))
     add("NO_REQUIRED_UNIT", "/nodes");
   return issues;

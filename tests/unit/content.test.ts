@@ -245,6 +245,7 @@ test("safe node links and private assets retain canonical text through repositor
   );
   const name = `assets/${hash}.png`;
   const doc = simple();
+  doc.description = `Read [more](#node-more) and ![diagram](${name}).`;
   doc.nodes[0].body = `Read [next](#node-more).\n\n![A diagram](${name})\n\n\`[code](#node-more)\`\n`;
   doc.nodes.push({
     ...newNode("lesson", "more", "More", null, 1),
@@ -265,6 +266,16 @@ test("safe node links and private assets retain canonical text through repositor
   assert.ok(
     validateContent(doc, { assets: [] }).some(
       (i) => i.code === "MISSING_ASSET",
+    ),
+  );
+  assert.ok(
+    validateContent({ ...doc, description: "[bad](#node-missing)" }).some(
+      (i) => i.code === "MISSING_NODE_LINK" && i.pointer === "/description",
+    ),
+  );
+  assert.ok(
+    validateContent({ ...doc, description: "[bad](https:example.com)" }).some(
+      (i) => i.code === "UNSAFE_URL",
     ),
   );
 });
