@@ -2,6 +2,7 @@ import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 import nodemailer from "nodemailer";
 import type { PoolClient } from "pg";
 import type { Locale } from "../../domain/src/workspaces/permissions";
+import { isProductionRuntime } from "./runtime";
 export interface MailEnvelope {
   to: string;
   subject: string;
@@ -85,13 +86,13 @@ export async function enqueueMail(
 export function smtpTransport() {
   const port = Number(process.env.SMTP_PORT ?? 1025);
   const secure = process.env.SMTP_SECURE === "true";
-  if (process.env.NODE_ENV === "production" && !secure && port !== 587)
+  if (isProductionRuntime() && !secure && port !== 587)
     throw new Error("Production SMTP requires TLS or STARTTLS on port 587");
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST ?? "localhost",
     port,
     secure,
-    requireTLS: process.env.NODE_ENV === "production" && !secure,
+    requireTLS: isProductionRuntime() && !secure,
     auth: process.env.SMTP_USER
       ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASSWORD }
       : undefined,

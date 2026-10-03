@@ -11,3 +11,6 @@ test-results/
 .test-postgres/
 coverage/
 dist/
+
+.windows-launch-state.json
+.windows-launch-state.json.tmp

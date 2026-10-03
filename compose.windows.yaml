@@ -12,7 +12,7 @@ services:
       - ./infra/init-roles.sql:/docker-entrypoint-initdb.d/01-roles.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d learning"]
-      interval: 5s
+      interval: 2s
       timeout: 5s
       retries: 20
     restart: unless-stopped
@@ -38,6 +38,7 @@ services:
       dockerfile: infra/Dockerfile
       target: local
     environment:
+      APP_RUNTIME_MODE: windows-local
       CONTENT_STORAGE_DIR: /app/content-storage
       APP_URL: http://localhost:3000
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Run start-windows.bat first}
@@ -53,7 +54,7 @@ services:
       - windows-content-data:/app/content-storage
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/en/register').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
-      interval: 5s
+      interval: 2s
       timeout: 5s
       retries: 24
       start_period: 15s
@@ -69,7 +70,9 @@ services:
       dockerfile: infra/Dockerfile
       target: worker
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
+      APP_RUNTIME_MODE: windows-local
+      APP_URL: http://localhost:3000
       MAIL_ENCRYPTION_KEY: ${MAIL_ENCRYPTION_KEY:?Run start-windows.bat first}
       DATABASE_WORKER_URL: postgres://learning_worker:development-worker@postgres:5432/learning
       SMTP_HOST: mailpit

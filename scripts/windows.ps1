@@ -1,9 +1,10 @@
 # Windows PowerShell 5.1 compatible; no global execution-policy changes.
 [CmdletBinding()]
-param([switch]$Stop)
+param([switch]$Stop, [switch]$Rebuild, [switch]$NoBrowser)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location -LiteralPath $root
+. (Join-Path $PSScriptRoot 'windows-cache.ps1')
 
 function Refresh-Path {
     $env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [Environment]::GetEnvironmentVariable('Path', 'User')
@@ -36,6 +37,35 @@ function Test-WslReady {
     $ErrorActionPreference = 'Continue'
     & wsl.exe --status 2>$null | Out-Null
     return ($LASTEXITCODE -eq 0)
+}
+
+function Get-StackImages {
+    # IDs also detect removed/replaced images after a Docker cleanup.
+    $names = & docker.exe @compose config --images
+    if ($LASTEXITCODE -ne 0) { throw 'Unable to resolve Windows stack images.' }
+    $ErrorActionPreference = 'Continue'
+    $ids = foreach ($name in ($names | Sort-Object -Unique)) {
+        $id = & docker.exe image inspect --format '{{.Id}}' $name 2>$null
+        if ($LASTEXITCODE -ne 0) { return '' }
+        "$name=$id"
+    }
+    return ($ids -join "`n")
+}
+
+function Test-StackHealthy {
+    $ErrorActionPreference = 'Continue'
+    $ids = @(& docker.exe @compose ps --all --quiet postgres mailpit web worker)
+    if ($LASTEXITCODE -ne 0 -or $ids.Count -ne 4) { return $false }
+    $json = & docker.exe inspect @ids 2>$null
+    if ($LASTEXITCODE -ne 0) { return $false }
+    try {
+        $containers = ($json -join "`n") | ConvertFrom-Json
+        foreach ($container in $containers) {
+            if (-not $container.State.Running) { return $false }
+            if ($container.State.Health -and $container.State.Health.Status -ne 'healthy') { return $false }
+        }
+        return $true
+    } catch { return $false }
 }
 
 try {
@@ -101,14 +131,26 @@ try {
         $match = Select-String -LiteralPath $envFile -Pattern "^$key=([a-fA-F0-9]{64})$"
         if (-not $match) { throw "Invalid $key in .env.windows. Restore the original file; existing keys are never reset automatically." }
     }
-    Write-Host 'Building and starting PostgreSQL, mail inbox, migrations, web and email worker...'
-    Write-Host 'First launch downloads dependencies and can take several minutes.'
-    Invoke-Checked docker.exe ($compose + @('up', '--detach', '--build', '--wait', '--wait-timeout', '180'))
-    Write-Host 'Ready: http://localhost:3000/en/register'
+    $stateFile = Join-Path $root '.windows-launch-state.json'
+    $fingerprint = Get-WindowsSourceFingerprint -Root $root
+    $configuration = (Get-FileHash -LiteralPath $envFile -Algorithm SHA256).Hash
+    $images = Get-StackImages
+    $mode = Get-WindowsLaunchMode -State (Read-WindowsLaunchState $stateFile) -Fingerprint $fingerprint -Configuration $configuration -Images $images -Healthy (Test-StackHealthy) -Rebuild $Rebuild.IsPresent
+    if ($mode -eq 'Build') {
+        Write-Host 'First launch, source update or missing images: building the application.'
+        Write-Host 'Dependency downloads are cached separately from source changes.'
+        Invoke-Checked docker.exe ($compose + @('up', '--detach', '--build', '--pull', 'missing', '--wait', '--wait-timeout', '180'))
+    } elseif ($mode -eq 'Start') {
+        Write-Host 'Starting the saved application. No build or image download.'
+        Invoke-Checked docker.exe ($compose + @('up', '--detach', '--no-build', '--pull', 'never', '--wait', '--wait-timeout', '180'))
+    } else {
+        Write-Host 'Application is already running and healthy. Opening it directly.'
+    }
+    Write-WindowsLaunchState -Path $stateFile -Fingerprint $fingerprint -Configuration $configuration -Images (Get-StackImages)
+    Write-Host 'Ready: http://localhost:3000/en/workspaces'
     Write-Host 'Verification/reset/invitation emails: http://localhost:8025'
     Write-Host 'Use stop-windows.bat to stop; closing this window leaves the application running.'
-    Start-Process 'http://localhost:8025'
-    Start-Process 'http://localhost:3000/en/register'
+    if (-not $NoBrowser) { Start-Process 'http://localhost:3000/en/workspaces' }
     exit 0
 } catch {
     Write-Host "`nERROR: $($_.Exception.Message)" -ForegroundColor Red

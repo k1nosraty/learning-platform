@@ -2,6 +2,7 @@ import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { betterAuth } from "better-auth";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { emailMessage, enqueueMail } from "../../adapters/src/mail";
+import { isProductionRuntime } from "../../adapters/src/runtime";
 import * as schema from "../../database/src/auth-schema";
 import { authPool } from "../../database/src/connections";
 import type { Actor, Locale } from "../../domain/src/workspaces/permissions";
@@ -35,7 +36,7 @@ function makeAuth() {
     throw new Error("BETTER_AUTH_SECRET must contain at least 32 characters");
   const baseURL = process.env.APP_URL;
   if (!baseURL) throw new Error("Missing APP_URL");
-  if (process.env.NODE_ENV === "production" && !baseURL.startsWith("https://"))
+  if (isProductionRuntime() && !baseURL.startsWith("https://"))
     throw new Error("Production APP_URL must use HTTPS");
   return betterAuth({
     appName: "Learning Platform",
@@ -94,7 +95,7 @@ function makeAuth() {
       updateAge: 86400,
       cookieCache: { enabled: false },
     },
-    advanced: { useSecureCookies: process.env.NODE_ENV === "production" },
+    advanced: { useSecureCookies: isProductionRuntime() },
     rateLimit: {
       enabled: true,
       storage: "database",

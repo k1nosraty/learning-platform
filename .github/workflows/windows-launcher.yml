@@ -13,10 +13,15 @@ jobs:
       - name: Parse using built-in Windows PowerShell 5.1
         shell: powershell
         run: |
-          $tokens = $null
-          $errors = $null
-          [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $PWD 'scripts/windows.ps1'), [ref]$tokens, [ref]$errors) | Out-Null
-          if ($errors.Count) { $errors | Format-List; exit 1 }
+          foreach ($path in @('scripts/windows.ps1', 'scripts/windows-cache.ps1', 'scripts/test-windows-cache.ps1')) {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $PWD $path), [ref]$tokens, [ref]$errors) | Out-Null
+            if ($errors.Count) { $errors | Format-List; exit 1 }
+          }
+      - name: Test startup cache decisions on Windows PowerShell 5.1
+        shell: powershell
+        run: ./scripts/test-windows-cache.ps1
   containers:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
@@ -35,10 +40,24 @@ jobs:
       - run: docker compose --env-file .env.windows -f compose.windows.yaml config --quiet
       - run: docker compose --env-file .env.windows -f compose.windows.yaml up --detach --build --wait --wait-timeout 180
       - run: node scripts/container-smoke.mjs
+      - name: Repeated launch reuses the running stack
+        run: |
+          docker compose --env-file .env.windows -f compose.windows.yaml ps --quiet postgres mailpit web worker | sort > /tmp/containers-before
+          docker compose --env-file .env.windows -f compose.windows.yaml up --detach --no-build --pull never --wait --wait-timeout 180
+          docker compose --env-file .env.windows -f compose.windows.yaml ps --quiet postgres mailpit web worker | sort > /tmp/containers-after
+          diff /tmp/containers-before /tmp/containers-after
       - name: Restart with persisted database and rerun migrations
         run: |
           docker compose --env-file .env.windows -f compose.windows.yaml stop
-          docker compose --env-file .env.windows -f compose.windows.yaml up --detach --build --wait --wait-timeout 180
+          docker compose --env-file .env.windows -f compose.windows.yaml up --detach --no-build --pull never --wait --wait-timeout 180
+          node scripts/container-smoke.mjs --existing
+      - name: Source update reuses installed dependencies
+        run: |
+          echo 'CI source update cache check' >> apps/web/public/font-licenses.txt
+          docker compose --progress plain --env-file .env.windows -f compose.windows.yaml build 2>&1 | tee /tmp/rebuild.log
+          node scripts/check-docker-cache.mjs /tmp/rebuild.log
+          docker compose --env-file .env.windows -f compose.windows.yaml up --detach --no-build --pull never --wait --wait-timeout 180
+          curl --fail http://localhost:3000/font-licenses.txt | tail -1 | grep 'CI source update cache check'
           node scripts/container-smoke.mjs --existing
       - name: Failure logs
         if: failure()

@@ -10,3 +10,14 @@ dist
 playwright-report
 test-results
 *.tsbuildinfo
+
+.windows-launch-state.json
+.windows-launch-state.json.tmp
+.test-postgres
+coverage
+docs
+adr
+examples
+tests
+.github
+*.md
