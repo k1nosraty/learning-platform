@@ -76,7 +76,7 @@ test("bilingual visual system, keyboard navigation and safe editing work on real
   await page
     .getByLabel("متن منبع را بچسبانید", { exact: true })
     .fill("# Retained pasted source");
-  await page.getByLabel("یا فایلی انتخاب کنید", { exact: true }).setInputFiles({
+  await page.getByLabel("یا فایل انتخاب کنید", { exact: true }).setInputFiles({
     name: "README.md",
     mimeType: "text/markdown",
     buffer: Buffer.from("# Imported source"),
