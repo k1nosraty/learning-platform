@@ -8,10 +8,13 @@ import {
   type DraftDto,
 } from "../../../packages/contracts/src/content";
 import { contentCatalogs } from "../../../packages/contracts/src/content-locales";
+import { designCatalogs } from "../../../packages/contracts/src/design-locales";
 import type { Locale } from "../../../packages/domain/src/workspaces/permissions";
 import { ApiError, contentApi } from "../lib/content-client";
+import { ConfirmDialog } from "./confirm-dialog";
 import { ContentEditor } from "./content-editor";
 import { ContentIssues } from "./content-issues";
+import { Icon } from "./icon";
 import { Shell } from "./shell";
 
 export function PathEditor({
@@ -21,11 +24,12 @@ export function PathEditor({
   userId,
 }: {
   locale: Locale;
-  workspace: { id: string; name: string; type: string };
+  workspace: { id: string; name: string; role?: string; type: string };
   pathId: string;
   userId: string;
 }) {
   const t = contentCatalogs[locale],
+    d = designCatalogs[locale],
     base = `/api/v1/workspaces/${workspace.id}/paths/${pathId}`,
     storageKey = `content-draft:${userId}:${workspace.id}:${pathId}`;
   const [draft, setDraft] = useState<DraftDto | null>(null),
@@ -35,6 +39,9 @@ export function PathEditor({
     [message, setMessage] = useState(""),
     [issues, setIssues] = useState<ContentIssue[]>([]),
     [conflict, setConflict] = useState(false);
+  const [confirmation, setConfirmation] = useState<
+    "archive" | "discard" | null
+  >(null);
   const persisted = useRef(true);
   const operationKey = useRef<{ request: string; key: string } | null>(null);
   async function load(discard = false) {
@@ -132,6 +139,7 @@ export function PathEditor({
     <Shell
       locale={locale}
       signedIn
+      workspace={workspace}
       canChangeLocale={() => {
         if (!dirty || persisted.current) return true;
         setMessage(t.localeSave);
@@ -155,6 +163,24 @@ export function PathEditor({
           {draft?.archived ? t.archived : dirty ? t.unsaved : t.draft}
         </span>
       </div>
+      <p className="page-intro">{d.editHint}</p>
+      {confirmation && (
+        <ConfirmDialog
+          locale={locale}
+          title={confirmation === "archive" ? d.confirmArchive : d.discardTitle}
+          hint={
+            confirmation === "archive" ? d.confirmArchiveHint : d.discardHint
+          }
+          confirm={confirmation === "archive" ? d.archive : d.discard}
+          onCancel={() => setConfirmation(null)}
+          onConfirm={() => {
+            const action = confirmation;
+            setConfirmation(null);
+            if (action === "archive") void run("archive");
+            else void load(true).catch((e) => setMessage(e.message));
+          }}
+        />
+      )}
       {message && (
         <output className={issues.length ? "error" : "success"}>
           {message}
@@ -191,6 +217,7 @@ export function PathEditor({
                 disabled={busy || draft.archived || !dirty}
                 onClick={() => void run("save")}
               >
+                <Icon name="save" />
                 {t.save}
               </button>
               <button
@@ -198,6 +225,7 @@ export function PathEditor({
                 disabled={busy || draft.archived || dirty || conflict}
                 onClick={() => void run("publish")}
               >
+                <Icon name="upload" />
                 {t.publish}
               </button>
               {workspace.type === "personal" && (
@@ -206,6 +234,7 @@ export function PathEditor({
                   disabled={busy || draft.archived || dirty || conflict}
                   onClick={() => void run("start")}
                 >
+                  <Icon name="play" />
                   {t.start}
                 </button>
               )}
@@ -214,17 +243,21 @@ export function PathEditor({
                 className="secondary"
                 disabled={busy}
                 onClick={() =>
-                  void load(true).catch((e) => setMessage(e.message))
+                  dirty
+                    ? setConfirmation("discard")
+                    : void load(true).catch((e) => setMessage(e.message))
                 }
               >
+                <Icon name="clock" />
                 {t.reload}
               </button>
               <button
                 type="button"
                 className="secondary danger"
                 disabled={busy || draft.archived || dirty || conflict}
-                onClick={() => void run("archive")}
+                onClick={() => setConfirmation("archive")}
               >
+                <Icon name="archive" />
                 {t.archive}
               </button>
             </div>

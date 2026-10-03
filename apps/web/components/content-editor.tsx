@@ -9,7 +9,10 @@ import {
   newNode,
 } from "../../../packages/contracts/src/content";
 import { contentCatalogs } from "../../../packages/contracts/src/content-locales";
+import { designCatalogs } from "../../../packages/contracts/src/design-locales";
 import type { Locale } from "../../../packages/domain/src/workspaces/permissions";
+import { ConfirmDialog } from "./confirm-dialog";
+import { Icon } from "./icon";
 import { SafeMarkdown } from "./safe-markdown";
 
 export function ContentEditor({
@@ -23,7 +26,9 @@ export function ContentEditor({
   locale: Locale;
   disabled?: boolean;
 }) {
-  const t = contentCatalogs[locale];
+  const t = contentCatalogs[locale],
+    d = designCatalogs[locale];
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [selected, setSelected] = useState<string | null>(
     doc.nodes[0]?.id ?? null,
   );
@@ -169,7 +174,10 @@ export function ContentEditor({
       </fieldset>
       <div className="editor-layout">
         <aside className="card structure">
-          <h2>{t.structure}</h2>
+          <h2 className="section-title">
+            <Icon name="layers" />
+            {t.structure}
+          </h2>
           <div className="node-add">
             <label>
               {t.kind}
@@ -190,6 +198,7 @@ export function ContentEditor({
               disabled={disabled || doc.nodes.length >= 1000}
               onClick={add}
             >
+              <Icon name="plus" />
               {t.add}
             </button>
           </div>
@@ -229,6 +238,7 @@ export function ContentEditor({
                     className="secondary"
                     onClick={() => move(-1)}
                   >
+                    <Icon name="moveUp" />
                     {t.up}
                   </button>
                   <button
@@ -236,13 +246,17 @@ export function ContentEditor({
                     className="secondary"
                     onClick={() => move(1)}
                   >
+                    <Icon name="moveDown" />
                     {t.down}
                   </button>
                 </div>
               </div>
-              <p className="hint">
-                {t.nodeId}: <bdi>{node.id}</bdi>
-              </p>
+              <details className="metadata-details">
+                <summary>{t.nodeId}</summary>
+                <p className="hint">
+                  <bdi>{node.id}</bdi>
+                </p>
+              </details>
               <label>
                 {t.nodeTitle}
                 <input
@@ -415,23 +429,41 @@ export function ContentEditor({
                 <button
                   type="button"
                   className="secondary danger"
-                  onClick={() => {
-                    onChange({
-                      ...doc,
-                      nodes: doc.nodes.filter((n) => !blocked.has(n.id)),
-                    });
-                    setSelected(null);
-                  }}
+                  onClick={() => setConfirmDelete(true)}
                 >
+                  <Icon name="trash" />
                   {t.delete}
                 </button>
               </div>
             </fieldset>
           ) : (
-            <p>{t.selectNode}</p>
+            <div className="empty-state editor-empty">
+              <span className="empty-symbol">
+                <Icon name="file" />
+              </span>
+              <h3>{d.noSelection}</h3>
+              <p>{d.noSelectionHint}</p>
+            </div>
           )}
         </section>
       </div>
+      {confirmDelete && (
+        <ConfirmDialog
+          locale={locale}
+          title={d.confirmDelete}
+          hint={d.confirmDeleteHint}
+          confirm={d.delete}
+          onCancel={() => setConfirmDelete(false)}
+          onConfirm={() => {
+            onChange({
+              ...doc,
+              nodes: doc.nodes.filter((n) => !blocked.has(n.id)),
+            });
+            setSelected(null);
+            setConfirmDelete(false);
+          }}
+        />
+      )}
     </div>
   );
 }

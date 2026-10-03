@@ -5,6 +5,7 @@ import { useState } from "react";
 import { catalogs } from "../../../packages/contracts/src/locales";
 import type { Locale } from "../../../packages/domain/src/workspaces/permissions";
 import { api } from "../lib/api-client";
+import { Icon } from "./icon";
 import { Shell } from "./shell";
 export function Invite({
   locale,
@@ -21,7 +22,10 @@ export function Invite({
   const [busy, setBusy] = useState(false);
   return (
     <Shell locale={locale} signedIn={signedIn}>
-      <section className="card auth">
+      <section className="card auth standalone-card">
+        <span className="auth-symbol">
+          <Icon name="mail" />
+        </span>
         <h1>{t.invitations}</h1>
         <p>{t.inviteIntro}</p>
         {signedIn ? (

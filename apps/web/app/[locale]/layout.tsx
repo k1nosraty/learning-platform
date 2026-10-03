@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { catalogs, isLocale } from "../../../../packages/contracts/src/locales";
+import "@fontsource-variable/inter";
+import "@fontsource-variable/vazirmatn";
 import "../styles.css";
 export default async function Layout({
   children,

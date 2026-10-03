@@ -4,10 +4,17 @@ import {
   contentCatalogs,
   contentIssues,
 } from "../packages/contracts/src/content-locales";
+import { designCatalogs } from "../packages/contracts/src/design-locales";
 import { catalogs, errors } from "../packages/contracts/src/locales";
 import { foundationOpenApi } from "../packages/contracts/src/openapi";
 
-for (const catalog of [catalogs, errors, contentCatalogs, contentIssues])
+for (const catalog of [
+  catalogs,
+  errors,
+  contentCatalogs,
+  contentIssues,
+  designCatalogs,
+])
   assert.deepEqual(
     Object.keys(catalog.en).sort(),
     Object.keys(catalog.fa).sort(),

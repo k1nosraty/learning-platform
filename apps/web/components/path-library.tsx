@@ -1,10 +1,12 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { contentCatalogs } from "../../../packages/contracts/src/content-locales";
+import { designCatalogs } from "../../../packages/contracts/src/design-locales";
 import type { Locale } from "../../../packages/domain/src/workspaces/permissions";
 import { contentApi } from "../lib/content-client";
+import { Icon } from "./icon";
 import { Shell } from "./shell";
 
 interface PathList {
@@ -22,9 +24,10 @@ export function PathLibrary({
   workspace,
 }: {
   locale: Locale;
-  workspace: { id: string; name: string };
+  workspace: { id: string; name: string; role?: string };
 }) {
   const t = contentCatalogs[locale],
+    d = designCatalogs[locale],
     router = useRouter(),
     base = `/api/v1/workspaces/${workspace.id}`;
   const [list, setList] = useState<PathList>({ items: [], nextCursor: null }),
@@ -35,19 +38,29 @@ export function PathLibrary({
     [text, setText] = useState(""),
     [file, setFile] = useState<File | null>(null),
     [mode, setMode] = useState<"loose" | "structured">("loose");
+  const [loading, setLoading] = useState(true),
+    [retry, setRetry] = useState(0);
+  const upload = useRef<HTMLInputElement>(null);
   useEffect(() => {
+    setLoading(true);
     let current = true;
     contentApi<PathList>(`${base}/paths${cursor ? `?cursor=${cursor}` : ""}`)
       .then((result) => {
-        if (current) setList(result);
+        if (current) {
+          setList(result);
+          setMessage("");
+        }
       })
       .catch((e) => {
         if (current) setMessage(e.message);
+      })
+      .finally(() => {
+        if (current) setLoading(false);
       });
     return () => {
       current = false;
     };
-  }, [base, cursor]);
+  }, [base, cursor, retry]);
   async function create() {
     setBusy(true);
     setMessage("");
@@ -90,7 +103,7 @@ export function PathLibrary({
     }
   }
   return (
-    <Shell locale={locale} signedIn>
+    <Shell locale={locale} signedIn workspace={workspace}>
       <Link
         className="section-link"
         href={`/${locale}/workspaces/${workspace.id}`}
@@ -102,39 +115,60 @@ export function PathLibrary({
           <p className="eyebrow">{workspace.name}</p>
           <h1>{t.paths}</h1>
         </div>
-        <span className="badge">{t.draftOnly}</span>
+        <span className="badge">
+          <Icon name="shield" />
+          {t.draftOnly}
+        </span>
       </div>
+      <p className="page-intro">{d.libraryIntro}</p>
       {message && (
         <p className="error" role="alert">
           {message}
         </p>
       )}
-      <section className="workspace-grid">
+      {loading && (
+        <output className="loading-panel">
+          <span className="spinner" aria-hidden="true" />
+          {d.loadingPaths}
+        </output>
+      )}
+      <section className="workspace-grid path-grid" aria-busy={loading}>
         {list.items.map((p) => (
-          <article className="card" key={p.id}>
-            <span className="badge">
-              {p.archivedAt
-                ? t.archived
-                : p.publishedVersionId
-                  ? t.published
-                  : t.draft}
-            </span>
+          <article className="card path-card" key={p.id}>
+            <div className="card-topline">
+              <span className="tile-icon">
+                <Icon name="book" />
+              </span>
+              <span
+                className={`badge ${p.archivedAt ? "badge-archived" : p.publishedVersionId ? "badge-published" : "badge-draft"}`}
+              >
+                {p.archivedAt
+                  ? t.archived
+                  : p.publishedVersionId
+                    ? t.published
+                    : t.draft}
+              </span>
+            </div>
             <h2>
               <bdi>{p.title}</bdi>
             </h2>
             <p>
+              <Icon name="globe" />
               <bdi>{p.language}</bdi>
             </p>
             <div className="actions">
               <Link
+                className="button secondary"
                 href={`/${locale}/workspaces/${workspace.id}/paths/${p.id}`}
               >
+                <Icon name="edit" />
                 {t.edit}
               </Link>
               {p.publishedVersionId && (
                 <Link
                   href={`/${locale}/workspaces/${workspace.id}/paths/${p.id}/versions/${p.publishedVersionId}`}
                 >
+                  <Icon name="eye" />
                   {t.read}
                 </Link>
               )}
@@ -142,7 +176,28 @@ export function PathLibrary({
           </article>
         ))}
       </section>
-      {!list.items.length && <p>{t.empty}</p>}
+      {!loading && !list.items.length && !message && (
+        <section className="empty-state">
+          <span className="empty-symbol">
+            <Icon name="book" />
+          </span>
+          <h2>{d.emptyTitle}</h2>
+          <p>{d.emptyHint}</p>
+          <a href="#create-path" className="button secondary">
+            <Icon name="plus" />
+            {t.create}
+          </a>
+        </section>
+      )}
+      {!loading && message && (
+        <button
+          className="secondary"
+          type="button"
+          onClick={() => setRetry(retry + 1)}
+        >
+          {designCatalogs[locale].retry}
+        </button>
+      )}
       <div className="pagination">
         {cursor && (
           <button
@@ -150,7 +205,8 @@ export function PathLibrary({
             className="secondary"
             onClick={() => setCursor(undefined)}
           >
-            ←
+            <Icon name="arrow" className="directional reverse" />
+            {d.first}
           </button>
         )}
         {list.nextCursor && (
@@ -159,13 +215,25 @@ export function PathLibrary({
             className="secondary"
             onClick={() => setCursor(list.nextCursor ?? undefined)}
           >
-            →
+            {d.next}
+            <Icon name="arrow" className="directional" />
           </button>
         )}
       </div>
-      <div className="columns">
+      <div className="creation-heading" id="create-path">
+        <h2>{d.createSection}</h2>
+      </div>
+      <div className="columns creation-panels">
         <section className="card">
-          <h2>{t.manual}</h2>
+          <div className="section-heading">
+            <span className="tile-icon">
+              <Icon name="edit" />
+            </span>
+            <div>
+              <h2>{t.manual}</h2>
+              <p className="hint">{d.createHint}</p>
+            </div>
+          </div>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -182,12 +250,21 @@ export function PathLibrary({
               />
             </label>
             <button disabled={busy} type="submit">
+              <Icon name="plus" />
               {t.create}
             </button>
           </form>
         </section>
         <section className="card">
-          <h2>{t.import}</h2>
+          <div className="section-heading">
+            <span className="tile-icon lavender">
+              <Icon name="upload" />
+            </span>
+            <div>
+              <h2>{t.import}</h2>
+              <p className="hint">{d.importHint}</p>
+            </div>
+          </div>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -219,13 +296,33 @@ export function PathLibrary({
             <label>
               {t.upload}
               <input
+                ref={upload}
                 type="file"
                 accept=".md,.markdown,.txt,.zip"
                 onChange={(e) => setFile(e.target.files?.[0] ?? null)}
               />
             </label>
+            <p className="hint">{d.fileHint}</p>
+            {file && (
+              <div className="selected-file">
+                <Icon name="file" />
+                <bdi>{file.name}</bdi>
+                <button
+                  type="button"
+                  className="icon-button secondary"
+                  aria-label={d.clearFile}
+                  onClick={() => {
+                    setFile(null);
+                    if (upload.current) upload.current.value = "";
+                  }}
+                >
+                  <Icon name="close" />
+                </button>
+              </div>
+            )}
             <p className="hint">{t.importHint}</p>
             <button disabled={busy || (!file && !text.trim())} type="submit">
+              <Icon name="upload" />
               {t.propose}
             </button>
           </form>

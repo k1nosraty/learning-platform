@@ -22,7 +22,7 @@ export function ImportPreview({
   userId,
 }: {
   locale: Locale;
-  workspace: { id: string; name: string };
+  workspace: { id: string; name: string; role?: string };
   importId: string;
   userId: string;
 }) {
@@ -138,6 +138,7 @@ export function ImportPreview({
     <Shell
       locale={locale}
       signedIn
+      workspace={workspace}
       canChangeLocale={() => {
         if (persisted.current) return true;
         setMessage(t.localeSave);

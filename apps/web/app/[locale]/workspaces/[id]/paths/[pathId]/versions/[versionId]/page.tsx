@@ -5,6 +5,7 @@ import type { Canonical } from "../../../../../../../../../../packages/contracts
 import { contentCatalogs } from "../../../../../../../../../../packages/contracts/src/content-locales";
 import { uuid } from "../../../../../../../../../../packages/contracts/src/foundation";
 import { DomainError } from "../../../../../../../../../../packages/domain/src/workspaces/permissions";
+import { Icon } from "../../../../../../../../components/icon";
 import {
   contentHref,
   SafeMarkdown,
@@ -43,7 +44,7 @@ export default async function Page({
       .flatMap((n) => [n, ...nodes(n.id)]);
   }
   return (
-    <Shell locale={locale} signedIn>
+    <Shell locale={locale} signedIn workspace={workspace}>
       {editable && (
         <Link
           className="section-link"
@@ -57,7 +58,6 @@ export default async function Page({
       </p>
       <h1 dir="auto">{doc.title}</h1>
       <p>{t.publishedReadonly}</p>
-      <p className="hint">{t.pendingLearning}</p>
       <SafeMarkdown
         locale={locale}
         body={doc.description}
@@ -65,6 +65,7 @@ export default async function Page({
       />
       {editable && (
         <a className="button" href={`${base}/export`}>
+          <Icon name="download" />
           {t.export}
         </a>
       )}

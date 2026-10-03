@@ -2,12 +2,14 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { contentCatalogs } from "../../../packages/contracts/src/content-locales";
+import { designCatalogs } from "../../../packages/contracts/src/design-locales";
 import { catalogs } from "../../../packages/contracts/src/locales";
 import type {
   Locale,
   Role,
 } from "../../../packages/domain/src/workspaces/permissions";
 import { api } from "../lib/api-client";
+import { Icon } from "./icon";
 import { Shell } from "./shell";
 import type { WorkspaceDTO } from "./workspaces";
 
@@ -45,7 +47,8 @@ export function WorkspaceAdmin({
   locale: Locale;
   initial: WorkspaceDTO;
 }) {
-  const t = catalogs[locale];
+  const t = catalogs[locale],
+    d = designCatalogs[locale];
   const [workspace, setWorkspace] = useState(initial);
   const [members, setMembers] = useState<Page<Member>>({
     items: [],
@@ -138,23 +141,29 @@ export function WorkspaceAdmin({
       </option>
     ));
   return (
-    <Shell locale={locale} signedIn>
+    <Shell locale={locale} signedIn workspace={workspace}>
       <Link className="section-link" href={`/${locale}/workspaces`}>
         {t.back}
       </Link>
       <span className="badge">
         {t[workspace.type]} · {t[workspace.role]}
       </span>
-      <h1>{workspace.name}</h1>
+      <h1 dir="auto">{workspace.name}</h1>
       {admin && (
-        <section className="card">
-          <h2>{contentCatalogs[locale].paths}</h2>
-          <p>{contentCatalogs[locale].importHint}</p>
+        <section className="card workspace-quickstart">
+          <span className="tile-icon">
+            <Icon name="book" />
+          </span>
+          <div>
+            <h2>{contentCatalogs[locale].paths}</h2>
+            <p className="hint">{d.pathsHint}</p>
+          </div>
           <Link
             className="button"
             href={`/${locale}/workspaces/${workspace.id}/paths`}
           >
-            {contentCatalogs[locale].paths}
+            {d.pathsAction}
+            <Icon name="arrow" className="directional" />
           </Link>
         </section>
       )}
@@ -165,8 +174,11 @@ export function WorkspaceAdmin({
       )}
       {notice && <output className="success">{notice}</output>}
       {owner && (
-        <section className="card">
-          <h2>{t.settings}</h2>
+        <section className="card" id="workspace-settings">
+          <h2 className="section-title">
+            <Icon name="settings" />
+            {t.settings}
+          </h2>
           <form
             className="inline-form"
             onSubmit={(e) => {
@@ -224,7 +236,10 @@ export function WorkspaceAdmin({
       {admin && organization && (
         <>
           <section className="card">
-            <h2>{t.members}</h2>
+            <h2 className="section-title">
+              <Icon name="users" />
+              {t.members}
+            </h2>
             {members.items.length === 0 && <p>{t.empty}</p>}
             {members.items.map((m) => (
               <div className="row" key={`${m.id}:${m.revision}`}>
@@ -292,7 +307,10 @@ export function WorkspaceAdmin({
             </div>
           </section>
           <section className="card">
-            <h2>{t.invitations}</h2>
+            <h2 className="section-title">
+              <Icon name="mail" />
+              {t.invitations}
+            </h2>
             <form
               className="inline-form"
               onSubmit={(e) => {
@@ -410,7 +428,10 @@ export function WorkspaceAdmin({
             </div>
           </section>
           <section className="card">
-            <h2>{t.relationships}</h2>
+            <h2 className="section-title">
+              <Icon name="layers" />
+              {t.relationships}
+            </h2>
             {owner && (
               <form
                 className="inline-form"
@@ -508,7 +529,6 @@ export function WorkspaceAdmin({
           </section>
         </>
       )}
-      <p className="hint">{t.securityHint}</p>
     </Shell>
   );
 }
