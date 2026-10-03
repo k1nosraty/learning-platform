@@ -139,7 +139,9 @@ try {
     if ($mode -eq 'Build') {
         Write-Host 'First launch, source update or missing images: building the application.'
         Write-Host 'Dependency downloads are cached separately from source changes.'
-        Invoke-Checked docker.exe ($compose + @('up', '--detach', '--build', '--pull', 'missing', '--wait', '--wait-timeout', '180'))
+        Invoke-Checked docker.exe ($compose + @('pull', '--policy', 'missing', 'postgres', 'mailpit'))
+        Invoke-Checked docker.exe ($compose + @('build'))
+        Invoke-Checked docker.exe ($compose + @('up', '--detach', '--no-build', '--pull', 'never', '--wait', '--wait-timeout', '180'))
     } elseif ($mode -eq 'Start') {
         Write-Host 'Starting the saved application. No build or image download.'
         Invoke-Checked docker.exe ($compose + @('up', '--detach', '--no-build', '--pull', 'never', '--wait', '--wait-timeout', '180'))

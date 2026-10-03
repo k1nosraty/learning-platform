@@ -38,7 +38,11 @@ jobs:
           Path('.env.windows').write_text('BETTER_AUTH_SECRET=' + secrets.token_hex(32) + '\nMAIL_ENCRYPTION_KEY=' + secrets.token_hex(32) + '\n')
           PY
       - run: docker compose --env-file .env.windows -f compose.windows.yaml config --quiet
-      - run: docker compose --env-file .env.windows -f compose.windows.yaml up --detach --build --wait --wait-timeout 180
+      - name: First launch builds missing application images
+        run: |
+          docker compose --env-file .env.windows -f compose.windows.yaml pull --policy missing postgres mailpit
+          docker compose --env-file .env.windows -f compose.windows.yaml build
+          docker compose --env-file .env.windows -f compose.windows.yaml up --detach --no-build --pull never --wait --wait-timeout 180
       - run: node scripts/container-smoke.mjs
       - name: Repeated launch reuses the running stack
         run: |
