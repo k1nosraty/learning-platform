@@ -2,6 +2,8 @@
 
 All documents are design requirements, dated 2026-10-02. They do not certify implemented behavior. See [package status](../PACKAGE_STATUS.md).
 
+Runtime implementation/setup evidence: [Foundation](FOUNDATION.md), [Content engine](CONTENT.md), [Windows launcher](WINDOWS.md). The numbered documents below remain the broader design contracts.
+
 | File | Main question |
 | --- | --- |
 | [01-PRODUCT-VISION.md](01-PRODUCT-VISION.md) | Who benefits and what problem does the product solve? |

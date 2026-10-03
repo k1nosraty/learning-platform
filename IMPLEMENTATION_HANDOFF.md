@@ -25,4 +25,4 @@ Finish requested implementation scope and concrete checks first. Then use the us
 
 ## Current implementation
 
-Phase 1 Foundation is implemented on `develop`. Read [Foundation setup and evidence](docs/FOUNDATION.md) before proceeding. This original handoff remains the initial scope/invariants; the next slice is Phase 2 Content engine.
+Phases 1 Foundation and 2 Content engine are implemented and validated on `develop`. Read [Foundation setup](docs/FOUNDATION.md), [Content evidence](docs/CONTENT.md), [Windows setup](docs/WINDOWS.md) and [ADR-013](adr/ADR-013-phase2-bounded-local-content.md) before proceeding. The initial Phase 1-only instruction above is historical; current scope follows the user's explicit phase instruction. Phase 3 Learning has not started and needs its own instruction.

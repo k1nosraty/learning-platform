@@ -1,6 +1,6 @@
 # Phase 2 — Content engine
 
-Status: implementation complete; PostgreSQL, browser and container validation in progress on `develop`. Phase 3 progress/reviews/reports and AI have not started.
+Status: Phase 2 implemented on `develop`; content gate passed on 2026-10-03. Phase 3 progress/reviews/reports and AI have not started.
 
 ## Use it
 
@@ -35,4 +35,20 @@ Original source access expires after 30 days. Physical cleanup, unbound-object r
 
 [Generated OpenAPI](api/foundation.openapi.json) includes content endpoints. Draft save is PUT; publish/start/archive and import confirm/cancel are POST with preconditions. Imports accept JSON text or multipart upload. Read-only version `/export` returns ZIP synchronously; `/assets?name=...` proxies a private snapshot file. Error DTOs carry localized messages, stable codes and field/source pointers. Existing session/origin boundaries apply.
 
-Local `pnpm check` (lint, TypeScript, 11 unit tests, OpenAPI/fa/en parity) and `pnpm build` pass. Root-only restrictions block local native PostgreSQL/Chromium; this is not counted as a pass. GitHub Actions runs real database/browser/container checks. Final evidence will be recorded after completion.
+Validated application commit: [`6495422`](https://github.com/k1nosraty/learning-platform/commit/64954229eaba170e0968bb9f62953a1c279b820a). Documentation updates follow that commit.
+
+| Check | Result / environment |
+| --- | --- |
+| `pnpm check` | Pass: lint, TypeScript, 11 unit tests, generated OpenAPI and fa/en key/placeholder parity |
+| `pnpm build` | Pass: Next application and email worker; no content-storage tracing warnings |
+| `pnpm test:integration` | 15/15 pass: actual PostgreSQL 18, non-owner runtime roles, fresh/repeated migrations, populated Phase 1 upgrade, RLS/CAS/idempotency, sealed versions, rollback, atomic start, private bytes and real session API |
+| `pnpm test:e2e` | 4/4 Chromium journeys pass: verified onboarding, fa/en unsaved editor, personal publication, real ZIP download/re-import, old version preservation, Persian reviewed import and explicit approval conversion |
+| Windows launcher CI | PowerShell 5.1 parse passes on Windows; actual Docker stack passes import/start/private-image/export checks before and after restart with preserved volumes |
+| Visual review | Successful persisted-flow screenshots inspected: Persian desktop editor and 390px mobile published reader; no clipped controls or horizontal overflow |
+| `pnpm audit --prod` | No known vulnerabilities reported on 2026-10-03 |
+
+Evidence: [application checks/database/browser](https://github.com/k1nosraty/learning-platform/actions/runs/37120908267), [Windows/container checks](https://github.com/k1nosraty/learning-platform/actions/runs/37120908309). The browser run includes its report and screenshots as a short-lived CI artifact.
+
+Local `pnpm check`/build also passed. Root-only restrictions blocked local native PostgreSQL; those local attempts are not counted as passes. Real database/browser execution used GitHub Actions. Full Docker Desktop installation/UAC/WSL/reboot behavior still needs an actual Windows PC; CI verifies the PowerShell syntax and the containerized application, not desktop installation. Distributed storage, physical cleanup/load/restore and public deployment remain the stated later gates.
+
+New pinned content dependencies: Ajv 8.20.0, YAML 2.9.1, yauzl 3.4.0, yazl 3.3.1, unified 11.0.5, remark-parse 11.0.0, remark-gfm 4.0.1, unist-util-visit 5.1.0 and react-markdown 10.1.0. Node 24.19.0/pnpm 11.25.0 and the Foundation runtime remain pinned. Parsing uses ASTs; rendering skips raw HTML instead of enabling a raw-HTML/rehype pipeline.

@@ -2,6 +2,8 @@
 
 Status: Phase 1 implemented on `develop`; Foundation gate passed in GitHub Actions. No public deployment.
 
+Phase 2 is now delivered separately; see [Content setup, features and evidence](CONTENT.md). The results below retain the original Foundation validation record.
+
 ## Run locally
 
 **Windows:** use [start-windows.bat](../start-windows.bat) for prerequisite setup and the full local container stack; see [Windows guide](WINDOWS.md). The commands below remain available for manual development.

@@ -1,5 +1,7 @@
 # Planning Package Validation
 
+This historical planning-only note is preserved. Runtime evidence for delivered phases is in [Foundation](docs/FOUNDATION.md) and [Content engine](docs/CONTENT.md).
+
 Date: 2026-10-02. These checks verify the planning artifact only; no application tests, live database, provider call, deployment or PDF engine were run.
 
 | Check | Result |

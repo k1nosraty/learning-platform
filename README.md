@@ -1,6 +1,6 @@
 # Learning Platform
 
-فاز اول پیاده‌سازی شده و تست‌های آن در گیت‌هاب پاس شده‌اند: احراز هویت، فضای شخصی و سازمانی، اعضا، دعوت‌ها و رابط فارسی/انگلیسی. راهنمای اجرا و وضعیت تست‌ها در [Foundation](docs/FOUNDATION.md) آمده است. استقرار عمومی انجام نشده است.
+فازهای اول و دوم پیاده‌سازی شده‌اند و تست‌ها در گیت‌هاب پاس شده‌اند: احراز هویت و فضاهای کاری، ویرایشگر فارسی/انگلیسی، واردسازی Markdown با پیش‌نمایش، انتشار نسخه‌های ثابت و خروجی ZIP. راهنمای اجرا و نتایج تست‌ها در [Foundation](docs/FOUNDATION.md) و [Content](docs/CONTENT.md) آمده است. استقرار عمومی انجام نشده است.
 
 هدف: محتوایی که کاربر از قبل دارد—README، متن یا برنامهٔ آموزشی—به یک مسیر یادگیری قابل‌پیگیری تبدیل شود. استفادهٔ شخصی ساده بماند و شرکت بتواند همان هسته را برای تخصیص مسیر، بررسی شواهد و گزارش‌گیری به کار بگیرد.
 
@@ -31,9 +31,9 @@
 
 The original specifications express the long-term vision. MVP scope narrows the first release. Detailed documents refine its behavior; a refinement must not silently add deferred features or weaken isolation/history/privacy. Conflicts are resolved explicitly in an ADR and updated across affected documents.
 
-Design documents remain the scope baseline. Phase 1 implementation is authorized on `develop`; public deployment is a separate action.
+Design documents remain the scope baseline. Phases 1 and 2 are implemented on `develop`; public deployment is a separate action.
 
-The production repository structure is documented in [Repository structure](docs/19-REPOSITORY-STRUCTURE.md). Application folders and executable commands now implement the Foundation slice.
+The production repository structure is documented in [Repository structure](docs/19-REPOSITORY-STRUCTURE.md). Application folders and executable commands implement Foundation and the Content engine.
 
 ## Non-negotiable invariants
 
@@ -48,4 +48,4 @@ The production repository structure is documented in [Repository structure](docs
 
 ## Next action
 
-**Phase 2 — Content engine** is implemented and undergoing validation on `develop`; see [Content](docs/CONTENT.md) for creation/import/publication/export and its boundaries. Phase 3 learning/progress has not started.
+**Phase 2 — Content engine** passed its gate on `develop`; see [Content](docs/CONTENT.md) for creation/import/publication/export and evidence. The next development slice is Phase 3 Learning, awaiting a separate start instruction.
