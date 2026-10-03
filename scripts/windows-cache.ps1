@@ -19,6 +19,10 @@ function Get-WindowsSourceFingerprint {
         $path = Join-Path $Root $name
         if (Test-Path -LiteralPath $path) { $files.Add($path) }
     }
+    $schemaDirectory = Join-Path $Root 'schemas'
+    if (Test-Path -LiteralPath $schemaDirectory) {
+        foreach ($item in Get-ChildItem -LiteralPath $schemaDirectory -Filter '*.json' -File) { $files.Add($item.FullName) }
+    }
     $lines = foreach ($path in ($files | Sort-Object)) {
         $relative = $path.Substring($Root.TrimEnd([char[]]@('\', '/')).Length + 1).Replace('\', '/')
         $relative + ':' + (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash

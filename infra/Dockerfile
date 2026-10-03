@@ -19,6 +19,7 @@ COPY apps ./apps
 COPY packages ./packages
 COPY scripts ./scripts
 COPY tsconfig.json ./
+COPY schemas/*.json ./schemas/
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm build
 
